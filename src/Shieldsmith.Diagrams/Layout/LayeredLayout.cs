@@ -140,6 +140,14 @@ public sealed class LayeredLayout
         return layers;
     }
 
+    // Note for anyone tempted to cap layer width here: spilling over-full layers
+    // into the next one was tried and measured, and it makes the diagram wider,
+    // not narrower. Pushing a node down lengthens every edge that crosses it,
+    // and each extra layer an edge spans costs a dummy node that occupies width
+    // in its own layer. On a 100 table solution it went from 35962 to 43100
+    // pixels wide. A large entity relationship graph is not a DAG and wants a
+    // different layout, not a tweaked layered one.
+
     // ---- 4. Crossing reduction -------------------------------------------
     // Median heuristic, sweeping down then up, keeping the best ordering seen.
 

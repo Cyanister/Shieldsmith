@@ -131,13 +131,13 @@
                     <Border Style="{StaticResource Card}" Margin="0,14,0,0">
                         <StackPanel>
                             <TextBlock Text="Diagrams" Style="{StaticResource CardTitle}"/>
-                            <TextBlock Text="Mermaid renders where WebView2 is present. Shieldsmith's own engine always works, so a diagram never depends on an install."
+                            <TextBlock Text="The built-in engine has no dependencies and copes with large solutions. Mermaid is available where WebView2 is present, but gives up quietly on big diagrams."
                                        Style="{StaticResource CardSubtitle}"/>
 
                             <TextBlock Text="Engine" Style="{StaticResource FieldLabel}"/>
                             <ComboBox x:Name="cmbEngine" Style="{StaticResource Picker}">
-                                <ComboBoxItem Content="Mermaid, falling back to built-in" IsSelected="True"/>
-                                <ComboBoxItem Content="Built-in engine only"/>
+                                <ComboBoxItem Content="Built-in engine" IsSelected="True"/>
+                                <ComboBoxItem Content="Mermaid, falling back to built-in"/>
                             </ComboBox>
 
                             <CheckBox x:Name="chkShowAttributes" Style="{StaticResource Check}"

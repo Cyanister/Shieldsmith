@@ -43,6 +43,10 @@ public static class FlowParser
             {
                 DesktopFlowParser.Attach(workflow, process, rootPath, model);
             }
+            else if (process.Kind == ProcessKind.BusinessProcessFlow)
+            {
+                BusinessProcessFlowParser.Attach(process, rootPath, model);
+            }
             else if (process.Kind == ProcessKind.CloudFlow && !string.IsNullOrEmpty(process.FileName))
             {
                 var jsonPath = Path.Combine(rootPath,

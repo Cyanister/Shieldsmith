@@ -177,6 +177,42 @@ public static class SolutionJsonExporter
                 tools = a.Tools.Select(t => new { t.Name, t.Description, t.Kind }),
                 knowledgeSources = a.KnowledgeSources.Select(k => new { k.Name, k.SourceKind, k.Site }),
             }),
+            pluginAssemblies = model.PluginAssemblies.Select(a => new
+            {
+                a.Name,
+                a.FullName,
+                a.Version,
+                a.IsolationMode,
+                types = a.Types.Select(t => new { name = t.DisplayName, t.AssemblyQualifiedName }),
+                steps = a.Steps.Select(s => new
+                {
+                    s.Name, s.Message, s.PrimaryEntity, s.Stage, s.Mode, s.Rank,
+                    filteringAttributes = s.FilteringAttributes, s.ImageCount,
+                }),
+            }),
+            sdkMessageSteps = model.SdkMessageSteps.Select(s => new
+            {
+                s.Name, s.Message, s.PrimaryEntity, s.Stage, s.Mode, s.Rank,
+                pluginType = s.PluginTypeName,
+                filteringAttributes = s.FilteringAttributes,
+            }),
+            businessProcessFlows = model.Processes
+                .Where(p => p.BusinessProcessFlow is not null)
+                .Select(p => new
+                {
+                    p.Name,
+                    p.PrimaryEntity,
+                    p.IsActive,
+                    stages = p.BusinessProcessFlow!.Stages.Select(s => new
+                    {
+                        s.Order,
+                        s.Name,
+                        steps = s.Steps.Select(step => new
+                        {
+                            step.Name, step.DataField, step.IsSystemControl,
+                        }),
+                    }),
+                }),
             desktopFlows = model.Processes
                 .Where(p => p.DesktopFlow is not null)
                 .Select(p => new

@@ -298,6 +298,12 @@ public sealed class MermaidRenderer
                   mermaid.initialize({
                     startOnLoad: false,
                     securityLevel: 'strict',
+                    // Mermaid's defaults are sized for a web page, not a
+                    // hundred-table solution: at the default 50000 characters
+                    // it silently draws a "Maximum text size in diagram
+                    // exceeded" card instead of throwing.
+                    maxTextSize: 5000000,
+                    maxEdges: 5000,
                     theme: 'base',
                     fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
                     themeVariables: {
@@ -319,6 +325,27 @@ public sealed class MermaidRenderer
                   const { svg } = await mermaid.render('shieldsmithDiagram', source);
                   document.getElementById('out').innerHTML = svg;
                   const el = document.querySelector('#out svg');
+
+                  // Mermaid does not always throw when it gives up. For a size
+                  // limit, a parse error or an unsupported construct it renders
+                  // a picture of the error instead and returns it as a perfectly
+                  // valid SVG. That once shipped as a solution's entity
+                  // relationship diagram. Detect it and fail properly, so the
+                  // caller falls back to the built-in engine.
+                  const roleDescription = el.getAttribute('aria-roledescription') || '';
+                  const rendered = (el.textContent || '');
+                  const looksLikeError =
+                    roleDescription.toLowerCase() === 'error' ||
+                    /Maximum text size in diagram exceeded/i.test(rendered) ||
+                    /Syntax error in (graph|text)/i.test(rendered) ||
+                    /^\s*mermaid version\s/i.test(rendered);
+                  if (looksLikeError) {
+                    window.__shieldsmith = JSON.stringify({
+                      error: 'mermaid rendered an error diagram: ' +
+                             rendered.replace(/\s+/g, ' ').trim().slice(0, 200)
+                    });
+                    return;
+                  }
 
                   // Mermaid emits width="100%" plus a max-width style, so the
                   // rendered size depends on the window rather than the diagram.

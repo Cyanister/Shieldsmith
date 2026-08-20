@@ -331,7 +331,7 @@ public partial class MainWindow : Window
         SetBusy(true);
         var showAttributes = chkShowAttributes.IsChecked == true;
         var flowDiagrams = chkFlowDiagrams.IsChecked == true;
-        var useMermaid = cmbEngine.SelectedIndex == 0;
+        var useMermaid = cmbEngine.SelectedIndex == 1;
         var progress = new Progress<string>(message => txtStatus.Text = message);
 
         try

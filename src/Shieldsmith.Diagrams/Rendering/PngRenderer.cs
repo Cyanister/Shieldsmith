@@ -15,22 +15,49 @@ public static class PngRenderer
     /// <summary>Supersampling factor: draw large, scale down, get smooth edges.</summary>
     private const float Scale = 2f;
 
+    /// <summary>
+    /// Ceiling on the raster, in pixels. A GDI+ bitmap is a single allocation of
+    /// width * height * 4 bytes, and it throws a bare "Parameter is not valid"
+    /// long before it runs out of memory. A 100 table entity relationship
+    /// diagram supersampled 2x is comfortably past that, which used to take the
+    /// whole run down. 80 megapixels is about 320 MB and renders fine.
+    /// </summary>
+    private const long MaxPixels = 80_000_000;
+
+    /// <summary>Neither dimension may exceed this; GDI+ struggles well before int overflow.</summary>
+    private const int MaxDimension = 20_000;
+
     public static void Render(Graph graph, LayoutResult size, string outputPath, DiagramTheme? theme = null)
     {
         theme ??= DiagramTheme.Brand;
 
-        var width = Math.Max(1, (int)Math.Ceiling(size.Width * Scale));
-        var height = Math.Max(1, (int)Math.Ceiling(size.Height * Scale));
+        // Shrink rather than fail. The SVG alongside this is always exact, so a
+        // scaled-down raster loses fidelity, not information.
+        var scale = (double)Scale;
+        var unscaledWidth = Math.Max(1.0, size.Width);
+        var unscaledHeight = Math.Max(1.0, size.Height);
+
+        var byDimension = Math.Min(
+            MaxDimension / unscaledWidth,
+            MaxDimension / unscaledHeight);
+        var byArea = Math.Sqrt(MaxPixels / (unscaledWidth * unscaledHeight));
+        scale = Math.Min(scale, Math.Min(byDimension, byArea));
+        // Below this the text is unreadable anyway, and the caller is better off
+        // with the SVG; but still produce something rather than nothing.
+        scale = Math.Max(scale, 0.05);
+
+        var width = Math.Max(1, (int)Math.Ceiling(unscaledWidth * scale));
+        var height = Math.Max(1, (int)Math.Ceiling(unscaledHeight * scale));
 
         using var bitmap = new Bitmap(width, height);
-        bitmap.SetResolution(96 * Scale, 96 * Scale);
+        bitmap.SetResolution((float)(96 * scale), (float)(96 * scale));
 
         using (var graphics = Graphics.FromImage(bitmap))
         {
             graphics.SmoothingMode = SmoothingMode.AntiAlias;
             graphics.TextRenderingHint = TextRenderingHint.AntiAlias;
             graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-            graphics.ScaleTransform(Scale, Scale);
+            graphics.ScaleTransform((float)scale, (float)scale);
             graphics.Clear(Parse(theme.Canvas));
 
             // Edges, then nodes, then edge labels, so labels sit on top.

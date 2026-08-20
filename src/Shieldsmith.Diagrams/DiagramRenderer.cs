@@ -21,10 +21,23 @@ public static class DiagramRenderer
         var svgPath = Path.Combine(outputDirectory, baseName + ".svg");
         File.WriteAllText(svgPath, SvgRenderer.Render(graph, size, theme));
 
+        // The SVG is written first and is always exact. The raster is a
+        // convenience for Word and the preview pane, so if GDI+ cannot produce
+        // one the diagram is still delivered rather than the run being lost.
         var pngPath = Path.Combine(outputDirectory, baseName + ".png");
-        PngRenderer.Render(graph, size, pngPath, theme);
+        string? warning = null;
+        try
+        {
+            PngRenderer.Render(graph, size, pngPath, theme);
+        }
+        catch (Exception ex)
+        {
+            pngPath = null!;
+            warning = $"'{baseName}' is {size.Width:0} by {size.Height:0} and could not be " +
+                      $"rasterised ({ex.Message}); the SVG was written and is exact.";
+        }
 
-        return new DiagramFiles(svgPath, pngPath, size.Width, size.Height);
+        return new DiagramFiles(svgPath, pngPath, size.Width, size.Height, warning);
     }
 
     /// <summary>Lays out without writing files, for callers that only need coordinates.</summary>
@@ -37,4 +50,5 @@ public static class DiagramRenderer
     }
 }
 
-public sealed record DiagramFiles(string SvgPath, string PngPath, double Width, double Height);
+public sealed record DiagramFiles(string SvgPath, string? PngPath, double Width, double Height,
+    string? Warning = null);

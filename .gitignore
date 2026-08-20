@@ -14,6 +14,7 @@ build/version.iss
 # definitions, session notes and local settings are working material, not part
 # of the product.
 .claude/
+CLAUDE.md
 .cursor/
 *.log
 

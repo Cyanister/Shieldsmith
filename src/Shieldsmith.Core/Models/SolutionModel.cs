@@ -28,6 +28,9 @@ public sealed class SolutionModel
     public List<OptionSetModel> OptionSets { get; } = new();
     public List<SecurityRoleModel> SecurityRoles { get; } = new();
     public List<AppModuleModel> AppModules { get; } = new();
+    public List<PluginAssemblyModel> PluginAssemblies { get; } = new();
+    /// <summary>Every registration, including those whose assembly is not in this solution.</summary>
+    public List<SdkMessageStepModel> SdkMessageSteps { get; } = new();
     public List<SiteMapModel> SiteMaps { get; } = new();
 
     /// <summary>Non-fatal observations made while parsing: unresolved references,

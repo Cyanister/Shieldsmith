@@ -23,13 +23,33 @@ public static class DiagramSuite
     /// </summary>
     public delegate DiagramImage? MermaidRenderer(string mermaidSource, string outputDirectory, string baseName);
 
+    /// <summary>
+    /// Above this many tables, an entity relationship diagram showing every
+    /// column is a wall of text nobody can read: the boxes grow tall, the edges
+    /// span the whole canvas, and the result is a hairball. Names only keeps it
+    /// legible, and the per-table detail is in the document anyway.
+    /// </summary>
+    private const int ColumnsBecomeNoiseAbove = 25;
+
     public sealed class Options
     {
         public bool ShowColumns { get; set; } = true;
+
+        /// <summary>
+        /// Drops columns from the diagram when the solution is too large for
+        /// them to be readable. Set false to be taken literally.
+        /// </summary>
+        public bool SimplifyLargeDiagrams { get; set; } = true;
         public bool IncludeFlowDiagrams { get; set; } = true;
         /// <summary>Cap on rendered flow charts; the rest still get Mermaid source.</summary>
         public int MaxFlowDiagrams { get; set; } = 60;
-        public DiagramEngine PreferredEngine { get; set; } = DiagramEngine.Mermaid;
+        /// <summary>
+        /// The built-in engine by default. Mermaid is opt-in because it fails
+        /// on real solutions rather than on the fixture: past its size limits
+        /// it draws a picture of an error message and returns it as a valid
+        /// diagram, and it produces 12000 pixel tall strips for long flows.
+        /// </summary>
+        public DiagramEngine PreferredEngine { get; set; } = DiagramEngine.Internal;
         public DiagramTheme Theme { get; set; } = DiagramTheme.Brand;
     }
 
@@ -43,18 +63,27 @@ public static class DiagramSuite
 
         // --- Entity relationship diagram -----------------------------------
         progress?.Report("Building the entity relationship diagram...");
-        set.ErdMermaidSource = MermaidGenerator.BuildErd(model, options.ShowColumns);
+
+        var showColumns = options.ShowColumns;
+        if (showColumns && options.SimplifyLargeDiagrams &&
+            model.Entities.Count > ColumnsBecomeNoiseAbove)
+        {
+            showColumns = false;
+            set.Notes.Add($"The entity relationship diagram shows table names only: " +
+                          $"{model.Entities.Count} tables with every column is not readable. " +
+                          "Each table's columns are listed in full in its own section.");
+        }
+
+        set.ErdMermaidSource = MermaidGenerator.BuildErd(model, showColumns);
 
         var erdImage = TryMermaid(mermaidRenderer, set.ErdMermaidSource, outputDirectory, "erd",
             options, set, "entity relationship diagram");
         if (erdImage is null)
         {
-            var graph = SolutionGraphBuilder.BuildErd(model, options.ShowColumns);
+            var graph = SolutionGraphBuilder.BuildErd(model, showColumns);
             if (graph.Nodes.Count > 0)
-            {
-                var files = DiagramRenderer.Render(graph, outputDirectory, "erd", options.Theme);
-                erdImage = new DiagramImage(files.SvgPath, files.PngPath, DiagramEngine.Internal);
-            }
+                erdImage = RenderInternal(graph, outputDirectory, "erd", options, set,
+                    "entity relationship diagram");
         }
         set.Erd = erdImage;
 
@@ -83,10 +112,8 @@ public static class DiagramSuite
             {
                 var graph = SolutionGraphBuilder.BuildFlow(process);
                 if (graph.Nodes.Count > 1)
-                {
-                    var files = DiagramRenderer.Render(graph, flowDirectory, baseName, options.Theme);
-                    image = new DiagramImage(files.SvgPath, files.PngPath, DiagramEngine.Internal);
-                }
+                    image = RenderInternal(graph, flowDirectory, baseName, options, set,
+                        $"flow '{process.Name}'");
             }
             if (image is not null)
             {
@@ -96,6 +123,28 @@ public static class DiagramSuite
         }
 
         return set;
+    }
+
+    /// <summary>
+    /// Draws with the built-in engine. One diagram failing must not lose the
+    /// other fifty nine: a solution large enough to defeat the rasteriser is
+    /// exactly the solution whose documentation is worth most.
+    /// </summary>
+    private static DiagramImage? RenderInternal(Graph graph, string outputDirectory,
+        string baseName, Options options, DiagramSet set, string what)
+    {
+        try
+        {
+            var files = DiagramRenderer.Render(graph, outputDirectory, baseName, options.Theme);
+            if (files.Warning is not null) set.Notes.Add(files.Warning);
+            return new DiagramImage(files.SvgPath, files.PngPath, DiagramEngine.Internal);
+        }
+        catch (Exception ex)
+        {
+            set.Notes.Add($"The {what} could not be drawn ({ex.Message}). " +
+                          "Everything else in this document is unaffected.");
+            return null;
+        }
     }
 
     private static DiagramImage? TryMermaid(MermaidRenderer? renderer, string source,
@@ -144,7 +193,11 @@ public enum DiagramEngine
     Graphviz,
 }
 
-public sealed record DiagramImage(string SvgPath, string? PngPath, DiagramEngine Engine);
+public sealed record DiagramImage(string SvgPath, string? PngPath, DiagramEngine Engine)
+{
+    /// <summary>True when a raster exists; the SVG is always written.</summary>
+    public bool HasRaster => PngPath is not null && File.Exists(PngPath);
+}
 
 public sealed class DiagramSet
 {

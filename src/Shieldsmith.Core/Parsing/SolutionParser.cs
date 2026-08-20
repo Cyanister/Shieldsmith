@@ -36,6 +36,9 @@ public static class SolutionParser
         progress?.Report("Reading agents...");
         AgentParser.Parse(unpacked.RootPath, model);
 
+        progress?.Report("Reading plugins...");
+        PluginParser.Parse(customizations, model);
+
         progress?.Report("Reading environment variables...");
         ParseEnvironmentVariables(unpacked.RootPath, customizations, model);
 

@@ -42,6 +42,9 @@ public sealed class ProcessModel
     /// <summary>Present only for desktop flows whose Robin script was readable.</summary>
     public DesktopFlowDetail? DesktopFlow { get; set; }
 
+    /// <summary>Stages and steps, when this is a business process flow.</summary>
+    public BusinessProcessFlowDetail? BusinessProcessFlow { get; set; }
+
     /// <summary>
     /// Power Automate Desktop flows carry a UIFlowType; 2 is Power Automate
     /// Desktop. Its presence alongside category 6 is the reliable signal.
@@ -52,6 +55,35 @@ public sealed class ProcessModel
 /// <summary>
 /// A desktop flow's Robin script, broken into subflows and action steps.
 /// </summary>
+/// <summary>
+/// A business process flow's stages in order, each with the steps a user fills
+/// in. Read from the workflow XAML; see BusinessProcessFlowParser.
+/// </summary>
+public sealed class BusinessProcessFlowDetail
+{
+    public List<BusinessProcessStage> Stages { get; } = new();
+
+    public int StepCount => Stages.Sum(s => s.Steps.Count);
+}
+
+public sealed class BusinessProcessStage
+{
+    public string Name { get; set; } = string.Empty;
+    /// <summary>Position in the flow, from one.</summary>
+    public int Order { get; set; }
+    public List<BusinessProcessStep> Steps { get; } = new();
+}
+
+public sealed class BusinessProcessStep
+{
+    public string Name { get; set; } = string.Empty;
+    public string ControlId { get; set; } = string.Empty;
+    /// <summary>The column this step writes to; empty for an unbound step.</summary>
+    public string DataField { get; set; } = string.Empty;
+    /// <summary>System controls are added by the platform, not by the maker.</summary>
+    public bool IsSystemControl { get; set; }
+}
+
 public sealed class DesktopFlowDetail
 {
     public string SchemaVersion { get; set; } = string.Empty;
