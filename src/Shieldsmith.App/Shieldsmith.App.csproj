@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+    <AssemblyName>Shieldsmith</AssemblyName>
+    <RootNamespace>Shieldsmith.App</RootNamespace>
+    <ApplicationTitle>Shieldsmith</ApplicationTitle>
+    <ApplicationIcon>Assets\shieldsmith.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- WPF does not include images by default; every asset used by a view has
+         to be declared as a Resource or the pack URI resolves to nothing. -->
+    <Resource Include="Assets\*.png" />
+    <Resource Include="Assets\shieldsmith.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Shieldsmith.Ai\Shieldsmith.Ai.csproj" />
+    <ProjectReference Include="..\Shieldsmith.ExportPack\Shieldsmith.ExportPack.csproj" />
+    <ProjectReference Include="..\Shieldsmith.Core\Shieldsmith.Core.csproj" />
+    <ProjectReference Include="..\Shieldsmith.Diagrams\Shieldsmith.Diagrams.csproj" />
+    <ProjectReference Include="..\Shieldsmith.Mermaid\Shieldsmith.Mermaid.csproj" />
+    <ProjectReference Include="..\Shieldsmith.Outputs\Shieldsmith.Outputs.csproj" />
+  </ItemGroup>
+
+</Project>

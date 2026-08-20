@@ -1,0 +1,10 @@
+<botcomponent schemaname="ct_travelAssistant.topic.Greeting">
+  <componenttype>9</componenttype>
+  <iscustomizable>1</iscustomizable>
+  <name>Greeting</name>
+  <parentbotid>
+    <schemaname>ct_travelAssistant</schemaname>
+  </parentbotid>
+  <statecode>0</statecode>
+  <statuscode>1</statuscode>
+</botcomponent>

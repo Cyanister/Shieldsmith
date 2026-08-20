@@ -1,0 +1,11 @@
+<botcomponent schemaname="ct_travelAssistant.agent.Agent">
+  <componenttype>9</componenttype>
+  <description>Plans trips and answers questions about bookings.</description>
+  <iscustomizable>1</iscustomizable>
+  <name>Agent</name>
+  <parentbotid>
+    <schemaname>ct_travelAssistant</schemaname>
+  </parentbotid>
+  <statecode>0</statecode>
+  <statuscode>1</statuscode>
+</botcomponent>

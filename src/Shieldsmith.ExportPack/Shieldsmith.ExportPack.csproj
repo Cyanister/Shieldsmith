@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>Shieldsmith.ExportPack</AssemblyName>
+    <RootNamespace>Shieldsmith.ExportPack</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Shieldsmith.Core\Shieldsmith.Core.csproj" />
+    <ProjectReference Include="..\Shieldsmith.Outputs\Shieldsmith.Outputs.csproj" />
+  </ItemGroup>
+
+</Project>

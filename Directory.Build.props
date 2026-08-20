@@ -1,0 +1,25 @@
+<Project>
+
+  <PropertyGroup>
+    <Version>0.9.0</Version>
+    <Product>Shieldsmith</Product>
+    <Company>Cameron Shields</Company>
+    <Authors>Cameron Shields</Authors>
+    <Copyright>Copyright © Cameron Shields</Copyright>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!--
+      The build date, stamped into the assembly so the About screen can state
+      when this copy was built rather than guess from a file timestamp, which
+      changes whenever the file is copied. This does make each build differ
+      from the last, which is the point: a user reporting a problem can say
+      exactly which build they have.
+    -->
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>BuildDate</_Parameter1>
+      <_Parameter2>$([System.DateTime]::UtcNow.ToString("yyyy-MM-dd"))</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+</Project>

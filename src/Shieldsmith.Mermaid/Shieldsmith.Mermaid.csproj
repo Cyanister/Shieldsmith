@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <!-- The WebView2 package ships both WinForms and WPF hosts; enabling both
+         frameworks avoids an MSB3277 WindowsBase unification warning. -->
+    <UseWindowsForms>true</UseWindowsForms>
+    <UseWPF>true</UseWPF>
+    <AssemblyName>Shieldsmith.Mermaid</AssemblyName>
+    <RootNamespace>Shieldsmith.Mermaid</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3351.48" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- mermaid.min.js (MIT, mermaid-js/mermaid) is embedded so rendering works
+         completely offline: no CDN, no Node, no network at run time. -->
+    <EmbeddedResource Include="Assets\mermaid.min.js" />
+  </ItemGroup>
+
+</Project>

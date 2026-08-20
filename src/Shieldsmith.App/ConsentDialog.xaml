@@ -1,0 +1,56 @@
+<Window x:Class="Shieldsmith.App.ConsentDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Send extracted data to an AI provider?" Height="620" Width="760"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
+        Background="{StaticResource Canvas}"
+        FontFamily="{StaticResource BodyFont}"
+        UseLayoutRounding="True">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Background="{StaticResource Surface}"
+                BorderBrush="{StaticResource Border}" BorderThickness="0,0,0,1" Padding="22,18">
+            <StackPanel>
+                <TextBlock Text="This data leaves your machine"
+                           FontFamily="{StaticResource DisplayFont}" FontSize="17" FontWeight="SemiBold"
+                           Foreground="{StaticResource Text}"/>
+                <TextBlock x:Name="txtSummary" TextWrapping="Wrap" FontSize="13"
+                           Foreground="{StaticResource Text}" Margin="0,8,0,0"/>
+                <TextBlock TextWrapping="Wrap" FontSize="12" Foreground="{StaticResource Muted}" Margin="0,8,0,0"
+                           Text="What is sent is the structure extracted from the solution export, shown in full below: table and column definitions, relationships, flow structure and counts. A solution export contains no business records. Environment variable values are redacted unless you chose to include them."/>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Row="1" Style="{StaticResource Card}" Margin="22,18,22,0" Padding="0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Text="Exactly what will be sent"
+                           Style="{StaticResource CardTitle}" Margin="18,14,18,10"/>
+                <Border Grid.Row="1" Background="{StaticResource Canvas}"
+                        BorderBrush="{StaticResource Border}" BorderThickness="0,1,0,0"
+                        CornerRadius="0,0,10,10">
+                    <TextBox x:Name="txtPayload" IsReadOnly="True"
+                             FontFamily="{StaticResource MonoFont}" FontSize="11.5"
+                             Foreground="{StaticResource Text}"
+                             Background="Transparent" BorderThickness="0" Padding="16"
+                             TextWrapping="NoWrap" VerticalScrollBarVisibility="Auto"
+                             HorizontalScrollBarVisibility="Auto"/>
+                </Border>
+            </Grid>
+        </Border>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="22,16,22,18">
+            <Button Content="Cancel" Style="{StaticResource GhostButton}" IsCancel="True"/>
+            <Button x:Name="btnSend" Content="Send to provider" Margin="10,0,0,0"
+                    Style="{StaticResource PrimaryButton}" Click="btnSend_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

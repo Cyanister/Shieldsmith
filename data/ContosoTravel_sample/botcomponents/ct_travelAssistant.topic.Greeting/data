@@ -1,0 +1,24 @@
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnRecognizedIntent
+  id: main
+  intent:
+    displayName: Greeting
+    includeInOnSelectIntent: false
+    triggerQueries:
+      - Hello
+      - Good afternoon
+      - Can you help me book a trip
+  actions:
+    - kind: SendActivity
+      id: sendMessage_wF2kQp
+      activity:
+        text:
+          - Hello, I can help you plan and book a trip.
+        speak:
+          - Hello, I can help you plan a trip.
+    - kind: Question
+      id: askDestination
+      prompt:
+        text:
+          - Where would you like to travel?

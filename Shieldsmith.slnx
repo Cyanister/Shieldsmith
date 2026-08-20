@@ -1,0 +1,19 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Shieldsmith.Ai/Shieldsmith.Ai.csproj" />
+    <Project Path="src/Shieldsmith.App/Shieldsmith.App.csproj" />
+    <Project Path="src/Shieldsmith.Cli/Shieldsmith.Cli.csproj" />
+    <Project Path="src/Shieldsmith.Core/Shieldsmith.Core.csproj" />
+    <Project Path="src/Shieldsmith.Diagrams/Shieldsmith.Diagrams.csproj" />
+    <Project Path="src/Shieldsmith.ExportPack/Shieldsmith.ExportPack.csproj" />
+    <Project Path="src/Shieldsmith.Mcp/Shieldsmith.Mcp.csproj" />
+    <Project Path="src/Shieldsmith.Mermaid/Shieldsmith.Mermaid.csproj" />
+    <Project Path="src/Shieldsmith.Outputs/Shieldsmith.Outputs.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Shieldsmith.Ai.Tests/Shieldsmith.Ai.Tests.csproj" />
+    <Project Path="tests/Shieldsmith.Core.Tests/Shieldsmith.Core.Tests.csproj" />
+    <Project Path="tests/Shieldsmith.Diagrams.Tests/Shieldsmith.Diagrams.Tests.csproj" />
+    <Project Path="tests/Shieldsmith.Outputs.Tests/Shieldsmith.Outputs.Tests.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>Shieldsmith.Outputs</AssemblyName>
+    <RootNamespace>Shieldsmith.Outputs</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DocumentFormat.OpenXml" Version="3.1.0" />
+    <PackageReference Include="System.Drawing.Common" Version="9.0.0" />
+    <PackageReference Include="System.IO.Packaging" Version="10.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Shieldsmith.Core\Shieldsmith.Core.csproj" />
+    <ProjectReference Include="..\Shieldsmith.Diagrams\Shieldsmith.Diagrams.csproj" />
+  </ItemGroup>
+
+</Project>

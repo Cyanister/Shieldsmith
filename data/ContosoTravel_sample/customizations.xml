@@ -1,0 +1,615 @@
+<ImportExportXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Entities>
+    <Entity>
+      <Name LocalizedName="Trip" OriginalName="">ct_Trip</Name>
+      <EntityInfo>
+        <entity Name="ct_Trip">
+          <attributes>
+            <attribute PhysicalName="ct_TripId">
+              <Type>primarykey</Type>
+              <Name>ct_tripid</Name>
+              <LogicalName>ct_tripid</LogicalName>
+              <RequiredLevel>systemrequired</RequiredLevel>
+              <DisplayMask>ValidForAdvancedFind|RequiredForGrid</DisplayMask>
+              <IsCustomField>1</IsCustomField>
+              <displaynames>
+                <displayname description="Trip" languagecode="1033" />
+              </displaynames>
+              <Descriptions>
+                <Description description="Unique identifier for the trip." languagecode="1033" />
+              </Descriptions>
+            </attribute>
+            <attribute PhysicalName="ct_Name">
+              <Type>nvarchar</Type>
+              <Name>ct_name</Name>
+              <LogicalName>ct_name</LogicalName>
+              <RequiredLevel>required</RequiredLevel>
+              <DisplayMask>PrimaryName|ValidForAdvancedFind|ValidForForm|ValidForGrid|RequiredForForm</DisplayMask>
+              <MaxLength>200</MaxLength>
+              <IsCustomField>1</IsCustomField>
+              <displaynames>
+                <displayname description="Trip Name" languagecode="1033" />
+              </displaynames>
+              <Descriptions>
+                <Description description="The name of the trip." languagecode="1033" />
+              </Descriptions>
+            </attribute>
+            <attribute PhysicalName="ct_StartDate">
+              <Type>datetime</Type>
+              <Name>ct_startdate</Name>
+              <LogicalName>ct_startdate</LogicalName>
+              <RequiredLevel>required</RequiredLevel>
+              <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+              <IsCustomField>1</IsCustomField>
+              <displaynames>
+                <displayname description="Start Date" languagecode="1033" />
+              </displaynames>
+              <Descriptions>
+                <Description description="The date the trip begins." languagecode="1033" />
+              </Descriptions>
+            </attribute>
+            <attribute PhysicalName="ct_EndDate">
+              <Type>datetime</Type>
+              <Name>ct_enddate</Name>
+              <LogicalName>ct_enddate</LogicalName>
+              <RequiredLevel>none</RequiredLevel>
+              <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+              <IsCustomField>1</IsCustomField>
+              <displaynames>
+                <displayname description="End Date" languagecode="1033" />
+              </displaynames>
+              <Descriptions>
+                <Description description="The date the trip ends." languagecode="1033" />
+              </Descriptions>
+            </attribute>
+            <attribute PhysicalName="ct_DestinationId">
+              <Type>lookup</Type>
+              <Name>ct_destinationid</Name>
+              <LogicalName>ct_destinationid</LogicalName>
+              <RequiredLevel>none</RequiredLevel>
+              <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+              <IsCustomField>1</IsCustomField>
+              <LookupStyle>single</LookupStyle>
+              <LookupTypes />
+              <displaynames>
+                <displayname description="Destination" languagecode="1033" />
+              </displaynames>
+              <Descriptions>
+                <Description description="The destination this trip travels to." languagecode="1033" />
+              </Descriptions>
+            </attribute>
+            <attribute PhysicalName="ct_Budget">
+              <Type>money</Type>
+              <Name>ct_budget</Name>
+              <LogicalName>ct_budget</LogicalName>
+              <RequiredLevel>recommended</RequiredLevel>
+              <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+              <IsCustomField>1</IsCustomField>
+              <displaynames>
+                <displayname description="Budget" languagecode="1033" />
+              </displaynames>
+              <Descriptions>
+                <Description description="Planned spend for the trip." languagecode="1033" />
+              </Descriptions>
+            </attribute>
+            <attribute PhysicalName="OwnerId">
+              <Type>owner</Type>
+              <Name>ownerid</Name>
+              <LogicalName>ownerid</LogicalName>
+              <RequiredLevel>systemrequired</RequiredLevel>
+              <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+              <IsCustomField>0</IsCustomField>
+              <displaynames>
+                <displayname description="Owner" languagecode="1033" />
+              </displaynames>
+              <Descriptions>
+                <Description description="Owner of the record." languagecode="1033" />
+              </Descriptions>
+            </attribute>
+          </attributes>
+          <EntitySetName>ct_trips</EntitySetName>
+          <OwnershipTypeMask>UserOwned</OwnershipTypeMask>
+          <IsAuditEnabled>1</IsAuditEnabled>
+          <IsActivity>0</IsActivity>
+          <Descriptions>
+            <Description description="A planned journey with a destination, bookings and travellers." languagecode="1033" />
+          </Descriptions>
+        </entity>
+      </EntityInfo>
+      <FormXml>
+        <forms type="main">
+          <systemform>
+            <formid>{aaaaaaaa-0001-4000-8000-000000000001}</formid>
+            <FormPresentation>1</FormPresentation>
+            <FormActivationState>1</FormActivationState>
+            <form>
+              <formLibraries>
+                <Library name="ct_tripFormScript" libraryUniqueId="{aaaaaaaa-0002-4000-8000-000000000002}" />
+              </formLibraries>
+              <tabs>
+                <tab name="GENERAL_TAB" id="{aaaaaaaa-0003-4000-8000-000000000003}">
+                  <labels>
+                    <label description="General" languagecode="1033" />
+                  </labels>
+                  <columns>
+                    <column width="100%">
+                      <sections>
+                        <section name="details_section" id="{aaaaaaaa-0004-4000-8000-000000000004}">
+                          <labels>
+                            <label description="Trip details" languagecode="1033" />
+                          </labels>
+                          <rows>
+                            <row>
+                              <cell id="{aaaaaaaa-0005-4000-8000-000000000005}">
+                                <control id="ct_name" classid="{4273EDBD-AC1D-40d3-9FB2-095C621B552D}" datafieldname="ct_name" />
+                              </cell>
+                            </row>
+                            <row>
+                              <cell id="{aaaaaaaa-0006-4000-8000-000000000006}">
+                                <control id="ct_startdate" classid="{5B773807-9FB2-42db-97C3-7A91EFF8ADFF}" datafieldname="ct_startdate" />
+                              </cell>
+                            </row>
+                            <row>
+                              <cell id="{aaaaaaaa-0007-4000-8000-000000000007}">
+                                <control id="ct_destinationid" classid="{270BD3DB-D9AF-4782-9025-509E298DEC0A}" datafieldname="ct_destinationid" />
+                              </cell>
+                            </row>
+                          </rows>
+                        </section>
+                      </sections>
+                    </column>
+                  </columns>
+                </tab>
+              </tabs>
+            </form>
+            <IsCustomizable>1</IsCustomizable>
+            <LocalizedNames>
+              <LocalizedName description="Trip main form" languagecode="1033" />
+            </LocalizedNames>
+          </systemform>
+        </forms>
+      </FormXml>
+      <SavedQueries>
+        <savedqueries>
+          <savedquery>
+            <IsCustomizable>1</IsCustomizable>
+            <isquickfindquery>0</isquickfindquery>
+            <isprivate>0</isprivate>
+            <isdefault>1</isdefault>
+            <savedqueryid>{bbbbbbbb-0001-4000-8000-000000000001}</savedqueryid>
+            <layoutxml>&lt;grid name="resultset" object="10001" jump="ct_name" select="1" icon="1" preview="1"&gt;&lt;row name="result" id="ct_tripid"&gt;&lt;cell name="ct_name" width="300" /&gt;&lt;cell name="ct_startdate" width="125" /&gt;&lt;cell name="ct_budget" width="125" /&gt;&lt;/row&gt;&lt;/grid&gt;</layoutxml>
+            <querytype>0</querytype>
+            <fetchxml>&lt;fetch version="1.0" mapping="logical"&gt;&lt;entity name="ct_trip"&gt;&lt;attribute name="ct_name" /&gt;&lt;attribute name="ct_startdate" /&gt;&lt;attribute name="ct_budget" /&gt;&lt;order attribute="ct_startdate" descending="true" /&gt;&lt;/entity&gt;&lt;/fetch&gt;</fetchxml>
+            <LocalizedNames>
+              <LocalizedName description="Active Trips" languagecode="1033" />
+            </LocalizedNames>
+          </savedquery>
+        </savedqueries>
+      </SavedQueries>
+    </Entity>
+    <Entity>
+      <Name LocalizedName="Destination" OriginalName="">ct_Destination</Name>
+      <EntityInfo>
+        <entity Name="ct_Destination">
+          <attributes>
+            <attribute PhysicalName="ct_DestinationId">
+              <Type>primarykey</Type>
+              <Name>ct_destinationid</Name>
+              <LogicalName>ct_destinationid</LogicalName>
+              <RequiredLevel>systemrequired</RequiredLevel>
+              <DisplayMask>ValidForAdvancedFind|RequiredForGrid</DisplayMask>
+              <IsCustomField>1</IsCustomField>
+              <displaynames>
+                <displayname description="Destination" languagecode="1033" />
+              </displaynames>
+            </attribute>
+            <attribute PhysicalName="ct_Name">
+              <Type>nvarchar</Type>
+              <Name>ct_name</Name>
+              <LogicalName>ct_name</LogicalName>
+              <RequiredLevel>required</RequiredLevel>
+              <DisplayMask>PrimaryName|ValidForAdvancedFind|ValidForForm|ValidForGrid|RequiredForForm</DisplayMask>
+              <MaxLength>150</MaxLength>
+              <IsCustomField>1</IsCustomField>
+              <displaynames>
+                <displayname description="Destination Name" languagecode="1033" />
+              </displaynames>
+            </attribute>
+            <attribute PhysicalName="ct_Country">
+              <Type>nvarchar</Type>
+              <Name>ct_country</Name>
+              <LogicalName>ct_country</LogicalName>
+              <RequiredLevel>none</RequiredLevel>
+              <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+              <MaxLength>100</MaxLength>
+              <IsCustomField>1</IsCustomField>
+              <displaynames>
+                <displayname description="Country" languagecode="1033" />
+              </displaynames>
+            </attribute>
+            <attribute PhysicalName="ct_Rating">
+              <Type>int</Type>
+              <Name>ct_rating</Name>
+              <LogicalName>ct_rating</LogicalName>
+              <RequiredLevel>none</RequiredLevel>
+              <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+              <IsCustomField>1</IsCustomField>
+              <displaynames>
+                <displayname description="Rating" languagecode="1033" />
+              </displaynames>
+            </attribute>
+          </attributes>
+          <EntitySetName>ct_destinations</EntitySetName>
+          <OwnershipTypeMask>OrganizationOwned</OwnershipTypeMask>
+          <IsAuditEnabled>0</IsAuditEnabled>
+          <IsActivity>0</IsActivity>
+          <Descriptions>
+            <Description description="A place trips can travel to." languagecode="1033" />
+          </Descriptions>
+        </entity>
+      </EntityInfo>
+    </Entity>
+    <Entity>
+      <Name LocalizedName="Booking" OriginalName="">ct_Booking</Name>
+      <EntityInfo>
+        <entity Name="ct_Booking">
+          <attributes>
+            <attribute PhysicalName="ct_BookingId">
+              <Type>primarykey</Type>
+              <Name>ct_bookingid</Name>
+              <LogicalName>ct_bookingid</LogicalName>
+              <RequiredLevel>systemrequired</RequiredLevel>
+              <DisplayMask>ValidForAdvancedFind|RequiredForGrid</DisplayMask>
+              <IsCustomField>1</IsCustomField>
+              <displaynames>
+                <displayname description="Booking" languagecode="1033" />
+              </displaynames>
+            </attribute>
+            <attribute PhysicalName="ct_Name">
+              <Type>nvarchar</Type>
+              <Name>ct_name</Name>
+              <LogicalName>ct_name</LogicalName>
+              <RequiredLevel>required</RequiredLevel>
+              <DisplayMask>PrimaryName|ValidForAdvancedFind|ValidForForm|ValidForGrid|RequiredForForm</DisplayMask>
+              <MaxLength>200</MaxLength>
+              <IsCustomField>1</IsCustomField>
+              <displaynames>
+                <displayname description="Booking Reference" languagecode="1033" />
+              </displaynames>
+            </attribute>
+            <attribute PhysicalName="ct_TripId">
+              <Type>lookup</Type>
+              <Name>ct_tripid</Name>
+              <LogicalName>ct_tripid</LogicalName>
+              <RequiredLevel>required</RequiredLevel>
+              <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+              <IsCustomField>1</IsCustomField>
+              <LookupStyle>single</LookupStyle>
+              <LookupTypes />
+              <displaynames>
+                <displayname description="Trip" languagecode="1033" />
+              </displaynames>
+            </attribute>
+            <attribute PhysicalName="ct_Cost">
+              <Type>money</Type>
+              <Name>ct_cost</Name>
+              <LogicalName>ct_cost</LogicalName>
+              <RequiredLevel>none</RequiredLevel>
+              <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+              <IsCustomField>1</IsCustomField>
+              <displaynames>
+                <displayname description="Cost" languagecode="1033" />
+              </displaynames>
+            </attribute>
+            <attribute PhysicalName="ct_BookingType">
+              <Type>picklist</Type>
+              <Name>ct_bookingtype</Name>
+              <LogicalName>ct_bookingtype</LogicalName>
+              <RequiredLevel>none</RequiredLevel>
+              <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+              <IsCustomField>1</IsCustomField>
+              <displaynames>
+                <displayname description="Booking Type" languagecode="1033" />
+              </displaynames>
+            </attribute>
+            <attribute PhysicalName="ct_Confirmed">
+              <Type>bit</Type>
+              <Name>ct_confirmed</Name>
+              <LogicalName>ct_confirmed</LogicalName>
+              <RequiredLevel>none</RequiredLevel>
+              <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+              <IsCustomField>1</IsCustomField>
+              <displaynames>
+                <displayname description="Confirmed" languagecode="1033" />
+              </displaynames>
+            </attribute>
+          </attributes>
+          <EntitySetName>ct_bookings</EntitySetName>
+          <OwnershipTypeMask>UserOwned</OwnershipTypeMask>
+          <IsAuditEnabled>0</IsAuditEnabled>
+          <IsActivity>0</IsActivity>
+          <Descriptions>
+            <Description description="A flight, hotel or activity booked for a trip." languagecode="1033" />
+          </Descriptions>
+        </entity>
+      </EntityInfo>
+    </Entity>
+    <Entity>
+      <Name LocalizedName="Traveller" OriginalName="">ct_Traveller</Name>
+      <EntityInfo>
+        <entity Name="ct_Traveller">
+          <attributes>
+            <attribute PhysicalName="ct_TravellerId">
+              <Type>primarykey</Type>
+              <Name>ct_travellerid</Name>
+              <LogicalName>ct_travellerid</LogicalName>
+              <RequiredLevel>systemrequired</RequiredLevel>
+              <DisplayMask>ValidForAdvancedFind|RequiredForGrid</DisplayMask>
+              <IsCustomField>1</IsCustomField>
+              <displaynames>
+                <displayname description="Traveller" languagecode="1033" />
+              </displaynames>
+            </attribute>
+            <attribute PhysicalName="ct_Name">
+              <Type>nvarchar</Type>
+              <Name>ct_name</Name>
+              <LogicalName>ct_name</LogicalName>
+              <RequiredLevel>required</RequiredLevel>
+              <DisplayMask>PrimaryName|ValidForAdvancedFind|ValidForForm|ValidForGrid|RequiredForForm</DisplayMask>
+              <MaxLength>160</MaxLength>
+              <IsCustomField>1</IsCustomField>
+              <displaynames>
+                <displayname description="Full Name" languagecode="1033" />
+              </displaynames>
+            </attribute>
+            <attribute PhysicalName="ct_Email">
+              <Type>nvarchar</Type>
+              <Name>ct_email</Name>
+              <LogicalName>ct_email</LogicalName>
+              <RequiredLevel>required</RequiredLevel>
+              <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+              <MaxLength>320</MaxLength>
+              <IsCustomField>1</IsCustomField>
+              <displaynames>
+                <displayname description="Email" languagecode="1033" />
+              </displaynames>
+            </attribute>
+            <attribute PhysicalName="ct_DateOfBirth">
+              <Type>datetime</Type>
+              <Name>ct_dateofbirth</Name>
+              <LogicalName>ct_dateofbirth</LogicalName>
+              <RequiredLevel>none</RequiredLevel>
+              <DisplayMask>ValidForForm</DisplayMask>
+              <IsCustomField>1</IsCustomField>
+              <displaynames>
+                <displayname description="Date of Birth" languagecode="1033" />
+              </displaynames>
+            </attribute>
+            <attribute PhysicalName="OwnerId">
+              <Type>owner</Type>
+              <Name>ownerid</Name>
+              <LogicalName>ownerid</LogicalName>
+              <RequiredLevel>systemrequired</RequiredLevel>
+              <DisplayMask>ValidForAdvancedFind|ValidForForm|ValidForGrid</DisplayMask>
+              <IsCustomField>0</IsCustomField>
+              <displaynames>
+                <displayname description="Owner" languagecode="1033" />
+              </displaynames>
+            </attribute>
+          </attributes>
+          <EntityKeys>
+            <EntityKey>
+              <Name>ct_Email</Name>
+              <LogicalName>ct_email</LogicalName>
+              <EntityKeyAttributes>
+                <AttributeName>ct_email</AttributeName>
+              </EntityKeyAttributes>
+              <displaynames>
+                <displayname description="Email" languagecode="1033" />
+              </displaynames>
+            </EntityKey>
+          </EntityKeys>
+          <EntitySetName>ct_travellers</EntitySetName>
+          <OwnershipTypeMask>UserOwned</OwnershipTypeMask>
+          <IsAuditEnabled>0</IsAuditEnabled>
+          <IsActivity>0</IsActivity>
+          <Descriptions>
+            <Description description="A person who goes on trips." languagecode="1033" />
+          </Descriptions>
+        </entity>
+      </EntityInfo>
+    </Entity>
+  </Entities>
+  <EntityRelationships>
+    <EntityRelationship Name="ct_destination_trip">
+      <EntityRelationshipType>OneToMany</EntityRelationshipType>
+      <IsCustomizable>1</IsCustomizable>
+      <IsHierarchical>0</IsHierarchical>
+      <ReferencingEntityName>ct_Trip</ReferencingEntityName>
+      <ReferencedEntityName>ct_Destination</ReferencedEntityName>
+      <CascadeAssign>NoCascade</CascadeAssign>
+      <CascadeDelete>RemoveLink</CascadeDelete>
+      <CascadeReparent>NoCascade</CascadeReparent>
+      <ReferencingAttributeName>ct_destinationid</ReferencingAttributeName>
+    </EntityRelationship>
+    <EntityRelationship Name="ct_trip_booking">
+      <EntityRelationshipType>OneToMany</EntityRelationshipType>
+      <IsCustomizable>1</IsCustomizable>
+      <IsHierarchical>0</IsHierarchical>
+      <ReferencingEntityName>ct_Booking</ReferencingEntityName>
+      <ReferencedEntityName>ct_Trip</ReferencedEntityName>
+      <CascadeAssign>Cascade</CascadeAssign>
+      <CascadeDelete>Cascade</CascadeDelete>
+      <CascadeReparent>Cascade</CascadeReparent>
+      <ReferencingAttributeName>ct_tripid</ReferencingAttributeName>
+    </EntityRelationship>
+    <EntityRelationship Name="ct_trip_traveller">
+      <EntityRelationshipType>ManyToMany</EntityRelationshipType>
+      <IsCustomizable>1</IsCustomizable>
+      <IsHierarchical>0</IsHierarchical>
+      <FirstEntityName>ct_Trip</FirstEntityName>
+      <SecondEntityName>ct_Traveller</SecondEntityName>
+      <IntersectEntityName>ct_trip_traveller</IntersectEntityName>
+    </EntityRelationship>
+  </EntityRelationships>
+  <Roles>
+    <Role id="{cccccccc-0001-4000-8000-000000000001}" name="Travel Coordinator">
+      <IsCustomizable>1</IsCustomizable>
+      <RolePrivileges>
+        <RolePrivilege name="prvCreatect_trip" level="Basic" />
+        <RolePrivilege name="prvReadct_trip" level="Global" />
+        <RolePrivilege name="prvWritect_trip" level="Local" />
+        <RolePrivilege name="prvReadct_destination" level="Global" />
+        <RolePrivilege name="prvCreatect_booking" level="Basic" />
+        <RolePrivilege name="prvReadct_booking" level="Deep" />
+      </RolePrivileges>
+    </Role>
+  </Roles>
+  <AppModules>
+    <AppModule>
+      <UniqueName>ct_TravelHub</UniqueName>
+      <IntroducedVersion>1.0.0.0</IntroducedVersion>
+      <OptimizedFor>Desktop</OptimizedFor>
+      <statecode>0</statecode>
+      <statuscode>1</statuscode>
+      <FormFactor>1</FormFactor>
+      <ClientType>4</ClientType>
+      <NavigationType>0</NavigationType>
+      <AppModuleComponents>
+        <AppModuleComponent type="1" schemaName="ct_trip" />
+        <AppModuleComponent type="1" schemaName="ct_booking" />
+        <AppModuleComponent type="1" schemaName="ct_traveller" />
+      </AppModuleComponents>
+      <LocalizedNames>
+        <LocalizedName description="Travel Hub" languagecode="1033" />
+      </LocalizedNames>
+    </AppModule>
+  </AppModules>
+  <AppModuleSiteMaps>
+    <AppModuleSiteMap>
+      <SiteMapUniqueName>ct_TravelHub</SiteMapUniqueName>
+      <EnableCollapsibleGroups>0</EnableCollapsibleGroups>
+      <SiteMap>
+        <Area Id="TravelArea" ShowGroups="true">
+          <Titles>
+            <Title LCID="1033" Title="Travel" />
+          </Titles>
+          <Group Id="PlanningGroup">
+            <Titles>
+              <Title LCID="1033" Title="Planning" />
+            </Titles>
+            <SubArea Id="nav_trips" Entity="ct_trip">
+              <Titles>
+                <Title LCID="1033" Title="Trips" />
+              </Titles>
+            </SubArea>
+            <SubArea Id="nav_bookings" Entity="ct_booking">
+              <Titles>
+                <Title LCID="1033" Title="Bookings" />
+              </Titles>
+            </SubArea>
+          </Group>
+          <Group Id="PeopleGroup">
+            <Titles>
+              <Title LCID="1033" Title="People" />
+            </Titles>
+            <SubArea Id="nav_travellers" Entity="ct_traveller">
+              <Titles>
+                <Title LCID="1033" Title="Travellers" />
+              </Titles>
+            </SubArea>
+          </Group>
+        </Area>
+      </SiteMap>
+    </AppModuleSiteMap>
+  </AppModuleSiteMaps>
+  <Workflows>
+    <Workflow WorkflowId="{11111111-1111-1111-1111-111111111111}" Name="Send booking confirmation">
+      <JsonFileName>/Workflows/SendBookingConfirmation-11111111-1111-1111-1111-111111111111.json</JsonFileName>
+      <Type>1</Type>
+      <Category>5</Category>
+      <PrimaryEntity>ct_booking</PrimaryEntity>
+    </Workflow>
+    <Workflow WorkflowId="{22222222-2222-2222-2222-222222222222}" Name="New traveller welcome">
+      <JsonFileName>/Workflows/NewTravellerWelcome-22222222-2222-2222-2222-222222222222.json</JsonFileName>
+      <Type>1</Type>
+      <Category>5</Category>
+      <PrimaryEntity>ct_traveller</PrimaryEntity>
+    </Workflow>
+    <Workflow WorkflowId="{33333333-3333-3333-3333-333333333333}" Name="Trip approval">
+      <XamlFileName>/Workflows/TripApproval-33333333-3333-3333-3333-333333333333.xaml</XamlFileName>
+      <Type>1</Type>
+      <Category>0</Category>
+      <PrimaryEntity>ct_trip</PrimaryEntity>
+    </Workflow>
+    <Workflow WorkflowId="{55555555-5555-5555-5555-555555555555}" Name="Export bookings to Excel">
+      <JsonFileName>/Workflows/ExportBookingsToExcel-55555555-5555-5555-5555-555555555555.json</JsonFileName>
+      <Type>1</Type>
+      <Category>6</Category>
+      <StateCode>1</StateCode>
+      <StatusCode>2</StatusCode>
+      <UIFlowType>2</UIFlowType>
+      <SchemaVersion>2022.07</SchemaVersion>
+      <PrimaryEntity>none</PrimaryEntity>
+      <Definition>"@@ConnectionString: ''\r\n@@Type: 'Local'\r\n@@DisplayName: 'Computer'\r\nIMPORT 'controlRepo.appmask' AS appmask\r\n@INPUT ExcelPath : { 'Description': 'Where to write the workbook', 'FriendlyName': 'ExcelPath', 'Type': 'String' }\r\n@OUTPUT RowsExported : { 'Description': '', 'FriendlyName': 'RowsExported', 'Type': 'Numeric' }\r\nCALL Init\r\nExcel.LaunchExcel.LaunchAndOpen Path: ExcelPath Visible: False ReadOnly: False Instance=&gt; ExcelInstance\r\nLOOP FOREACH CurrentBooking IN Bookings\r\n    Excel.WriteToExcel.WriteCell Instance: ExcelInstance Value: CurrentBooking Column: 1 Row: RowIndex\r\n    Variables.IncreaseVariable Value: RowIndex IncrementValue: 1 IncreasedValue=&gt; RowIndex\r\nEND\r\nExcel.CloseExcel.CloseAndSaveAs Instance: ExcelInstance DocumentFormat: Excel.ExcelFormat.FromExtension\r\nFUNCTION Init GLOBAL\r\n    SET RowIndex TO 1\r\n    DateTime.GetCurrentDateTime.Local DateTimeFormat: DateTime.DateTimeFormat.DateAndTime CurrentDateTime=&gt; StartedAt\r\nEND FUNCTION"</Definition>
+      <LocalizedNames>
+        <LocalizedName languagecode="1033" description="Export bookings to Excel" />
+      </LocalizedNames>
+    </Workflow>
+  </Workflows>
+  <CanvasApps>
+    <CanvasApp>
+      <Name>ct_tripplanner_a1b2c</Name>
+      <AppVersion>2026-03-14T09:21:07Z</AppVersion>
+      <Status>Ready</Status>
+      <CreatedByClientVersion>3.26011.9.0</CreatedByClientVersion>
+      <MinClientVersion>3.26011.9.0</MinClientVersion>
+      <Tags>{"primaryDeviceWidth":"1366","primaryDeviceHeight":"768","primaryFormFactor":"Tablet"}</Tags>
+      <BackgroundColor>RGBA(0,170,170,1)</BackgroundColor>
+      <DisplayName>Trip Planner</DisplayName>
+      <Description>Books and reviews trips for travellers.</Description>
+      <CanvasAppType>0</CanvasAppType>
+      <IntroducedVersion>1.0</IntroducedVersion>
+      <DatabaseReferences>{"default.cds":{"dataSources":{"Trips":{"entitySetName":"ct_trips","logicalName":"ct_trip"},"Bookings":{"entitySetName":"ct_bookings","logicalName":"ct_booking"}}}}</DatabaseReferences>
+    </CanvasApp>
+  </CanvasApps>
+  <WebResources>
+    <WebResource>
+      <WebResourceId>{44444444-4444-4444-4444-444444444444}</WebResourceId>
+      <Name>ct_tripFormScript</Name>
+      <DisplayName>Trip form script</DisplayName>
+      <WebResourceType>3</WebResourceType>
+      <FileName>/WebResources/ct_tripFormScript44444444-4444-4444-4444-444444444444</FileName>
+    </WebResource>
+  </WebResources>
+  <optionsets>
+    <optionset Name="ct_bookingtype" localizedName="Booking Type">
+      <OptionSetType>picklist</OptionSetType>
+      <IsGlobal>1</IsGlobal>
+      <IsCustomizable>1</IsCustomizable>
+      <displaynames>
+        <displayname description="Booking Type" languagecode="1033" />
+      </displaynames>
+      <options>
+        <option value="100010000">
+          <labels>
+            <label description="Flight" languagecode="1033" />
+          </labels>
+        </option>
+        <option value="100010001">
+          <labels>
+            <label description="Hotel" languagecode="1033" />
+          </labels>
+        </option>
+        <option value="100010002">
+          <labels>
+            <label description="Activity" languagecode="1033" />
+          </labels>
+        </option>
+      </options>
+    </optionset>
+  </optionsets>
+  <Languages>
+    <Language>1033</Language>
+  </Languages>
+</ImportExportXml>

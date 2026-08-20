@@ -1,0 +1,10 @@
+<botcomponent schemaname="ct_travelAssistant.knowledge.searchcontent.TravelAdvice.0">
+  <componenttype>16</componenttype>
+  <iscustomizable>1</iscustomizable>
+  <name>Travel advice</name>
+  <parentbotid>
+    <schemaname>ct_travelAssistant</schemaname>
+  </parentbotid>
+  <statecode>0</statecode>
+  <statuscode>1</statuscode>
+</botcomponent>

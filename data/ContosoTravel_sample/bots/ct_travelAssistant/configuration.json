@@ -1,0 +1,8 @@
+{
+  "$kind": "BotConfiguration",
+  "settings": { "GenerativeActionsEnabled": true },
+  "isAgentConnectable": true,
+  "gPTSettings": { "$kind": "GPTSettings", "defaultSchemaName": "ct_travelAssistant.gpt.default" },
+  "aISettings": { "$kind": "AISettings", "useModelKnowledge": true, "isSemanticSearchEnabled": true },
+  "recognizer": { "$kind": "GenerativeAIRecognizer" }
+}

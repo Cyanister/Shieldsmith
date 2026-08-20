@@ -1,0 +1,5 @@
+kind: KnowledgeSourceConfiguration
+source:
+  kind: PublicSiteSearchSource
+  site: https://www.gov.uk/foreign-travel-advice
+  includeSubPages: true

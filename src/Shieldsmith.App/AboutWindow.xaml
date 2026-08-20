@@ -1,0 +1,205 @@
+<Window x:Class="Shieldsmith.App.AboutWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="About Shieldsmith" Height="800" Width="760"
+        Icon="Assets/shieldsmith.ico"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
+        ResizeMode="CanResize" MinHeight="520" MinWidth="620"
+        Background="{StaticResource Canvas}"
+        FontFamily="{StaticResource BodyFont}"
+        UseLayoutRounding="True">
+
+    <Window.Resources>
+        <Style x:Key="SectionTitle" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource DisplayFont}"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{StaticResource Text}"/>
+            <Setter Property="Margin" Value="0,0,0,10"/>
+        </Style>
+        <Style x:Key="Body" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12.5"/>
+            <Setter Property="Foreground" Value="{StaticResource Muted}"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="LineHeight" Value="19"/>
+        </Style>
+        <Style x:Key="FactKey" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12.5"/>
+            <Setter Property="Foreground" Value="{StaticResource Muted}"/>
+            <Setter Property="Margin" Value="0,0,16,7"/>
+        </Style>
+        <Style x:Key="FactValue" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12.5"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="Foreground" Value="{StaticResource Text}"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="Margin" Value="0,0,0,7"/>
+        </Style>
+        <Style x:Key="Step" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12.5"/>
+            <Setter Property="Foreground" Value="{StaticResource Muted}"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="LineHeight" Value="19"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+        </Style>
+        <Style x:Key="StepNumber" TargetType="Border">
+            <Setter Property="Width" Value="21"/>
+            <Setter Property="Height" Value="21"/>
+            <Setter Property="CornerRadius" Value="11"/>
+            <Setter Property="Background" Value="{StaticResource TintMid}"/>
+            <Setter Property="Margin" Value="0,0,11,8"/>
+            <Setter Property="VerticalAlignment" Value="Top"/>
+        </Style>
+        <Style x:Key="StepNumberText" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{StaticResource PrimaryDark}"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" Padding="26,26,26,0">
+            <StackPanel>
+
+                <Image Source="Assets/shieldsmith-logo-stacked.png" Width="190"
+                       HorizontalAlignment="Center" Margin="0,6,0,20"
+                       RenderOptions.BitmapScalingMode="HighQuality"/>
+
+                <TextBlock Style="{StaticResource Body}" TextAlignment="Center" Margin="0,0,0,22"
+                           Text="Documentation for Power Platform solutions, straight from the export zip. Shieldsmith reads the solution definition on this machine: no environment connection, no admin rights, no upload."/>
+
+                <!-- This build -->
+                <Border Style="{StaticResource Card}">
+                    <StackPanel>
+                        <TextBlock Text="This build" Style="{StaticResource SectionTitle}"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Version" Style="{StaticResource FactKey}"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1" x:Name="txtVersion" Style="{StaticResource FactValue}"/>
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Last updated" Style="{StaticResource FactKey}"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" x:Name="txtBuilt" Style="{StaticResource FactValue}"/>
+
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Runtime" Style="{StaticResource FactKey}"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" x:Name="txtRuntime" Style="{StaticResource FactValue}"/>
+
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Engines" Style="{StaticResource FactKey}"/>
+                            <TextBlock Grid.Row="3" Grid.Column="1" x:Name="txtEngines" Style="{StaticResource FactValue}"/>
+
+                            <TextBlock Grid.Row="4" Grid.Column="0" Text="Loaded solution" Style="{StaticResource FactKey}"/>
+                            <TextBlock Grid.Row="4" Grid.Column="1" x:Name="txtLoaded" Style="{StaticResource FactValue}"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- What it produces -->
+                <Border Style="{StaticResource Card}" Margin="0,14,0,0">
+                    <StackPanel>
+                        <TextBlock Text="What it produces" Style="{StaticResource SectionTitle}"/>
+                        <TextBlock Style="{StaticResource Body}" Margin="0,0,0,10"
+                                   Text="Every component in the solution, every table with its columns and requirement levels, every relationship with its cardinality, the automations with their triggers and actions, canvas app internals, Copilot Studio agents and desktop flows."/>
+                        <TextBlock Style="{StaticResource Body}"
+                                   Text="Those facts come out as a Word document with a cover page and contents, a Markdown set for a wiki, an entity relationship diagram and a chart per cloud flow, a real Visio .vsdx file, and the canonical JSON everything else is built from. Anything the export did not settle is written as a note rather than filled in with a plausible value."/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Using it -->
+                <Border Style="{StaticResource Card}" Margin="0,14,0,0">
+                    <StackPanel>
+                        <TextBlock Text="Using it" Style="{StaticResource SectionTitle}"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource StepNumber}">
+                                <TextBlock Text="1" Style="{StaticResource StepNumberText}"/>
+                            </Border>
+                            <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource Step}"
+                                       Text="Export the solution from Power Platform, managed or unmanaged, and drop the .zip anywhere on the Shieldsmith window. You can also pass one on the command line."/>
+
+                            <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource StepNumber}">
+                                <TextBlock Text="2" Style="{StaticResource StepNumberText}"/>
+                            </Border>
+                            <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource Step}"
+                                       Text="Press Analyse solution. Read the results in the tabs, and use the Diagrams tab to page through the entity relationship diagram and a chart for each cloud flow. Copy Mermaid puts the source of the selected diagram on the clipboard."/>
+
+                            <Border Grid.Row="2" Grid.Column="0" Style="{StaticResource StepNumber}">
+                                <TextBlock Text="3" Style="{StaticResource StepNumberText}"/>
+                            </Border>
+                            <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource Step}"
+                                       Text="Write whichever outputs you need: Word, a Markdown set, a Visio diagram, or a docpack folder you can open in your own Claude Code terminal and ask questions about."/>
+
+                            <Border Grid.Row="3" Grid.Column="0" Style="{StaticResource StepNumber}">
+                                <TextBlock Text="4" Style="{StaticResource StepNumberText}"/>
+                            </Border>
+                            <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource Step}"
+                                       Text="Optionally turn on AI interpretation with your own Anthropic or OpenAI key, or your installed Claude Code. It adds clearly labelled commentary to the Word and Markdown output and never touches a fact table."/>
+
+                            <Border Grid.Row="4" Grid.Column="0" Style="{StaticResource StepNumber}">
+                                <TextBlock Text="5" Style="{StaticResource StepNumberText}"/>
+                            </Border>
+                            <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource Step}"
+                                       Text="For live questions rather than a document, use Copy MCP registration and paste the command into a terminal. Claude Code can then query a parsed solution directly."/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Data -->
+                <Border Style="{StaticResource Card}" Margin="0,14,0,20">
+                    <StackPanel>
+                        <TextBlock Text="Where your data goes" Style="{StaticResource SectionTitle}"/>
+                        <TextBlock Style="{StaticResource Body}"
+                                   Text="Nowhere, unless you switch AI on. The zip is unpacked to a temporary folder on this machine and removed when the window closes. AI is off by default, and when it is on nothing is sent until a consent dialogue has shown you the exact payload. Environment variable values are redacted unless you choose otherwise, and API keys are encrypted with Windows DPAPI, never logged and never written into a report."/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <Border Grid.Row="1" Background="{StaticResource Surface}"
+                BorderBrush="{StaticResource Border}" BorderThickness="0,1,0,0" Padding="26,14">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                    <TextBlock x:Name="txtCopyright" Style="{StaticResource Hint}"/>
+                    <TextBlock Margin="0,2,0,0" FontSize="11.5">
+                        <Hyperlink NavigateUri="https://www.cameronshields.co.uk/"
+                                   Foreground="{StaticResource PrimaryDark}"
+                                   RequestNavigate="Hyperlink_RequestNavigate">cameronshields.co.uk</Hyperlink>
+                    </TextBlock>
+                </StackPanel>
+                <Button Grid.Column="1" Content="Close" Style="{StaticResource PrimaryButton}"
+                        IsCancel="True" IsDefault="True" VerticalAlignment="Center"/>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

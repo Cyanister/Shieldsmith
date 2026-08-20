@@ -1,0 +1,11 @@
+kind: AgentDialog
+beginDialog:
+  kind: OnToolSelected
+  id: main
+  description: This agent helps travellers plan trips and review their bookings.
+settings:
+  instructions: |-
+    Help the traveller choose a destination and review their existing bookings.
+    Always confirm dates before creating a booking.
+inputType: {}
+outputType: {}

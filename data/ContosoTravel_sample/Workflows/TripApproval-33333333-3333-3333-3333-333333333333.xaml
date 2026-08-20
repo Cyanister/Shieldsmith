@@ -1,0 +1,12 @@
+<Activity x:Class="TripApproval" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:mxswa="clr-namespace:Microsoft.Xrm.Sdk.Workflow.Activities;assembly=Microsoft.Xrm.Sdk.Workflow">
+  <x:Members>
+    <x:Property Name="InputEntities" Type="InArgument(scg:IDictionary(x:String, mxs:Entity))" xmlns:mxs="clr-namespace:Microsoft.Xrm.Sdk;assembly=Microsoft.Xrm.Sdk" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=mscorlib" />
+  </x:Members>
+  <mxswa:Workflow>
+    <Sequence DisplayName="Trip approval">
+      <Sequence.Variables>
+        <Variable x:TypeArguments="x:Boolean" Name="Approved" />
+      </Sequence.Variables>
+    </Sequence>
+  </mxswa:Workflow>
+</Activity>

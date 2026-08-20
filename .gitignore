@@ -1,0 +1,19 @@
+bin/
+obj/
+*.user
+*.suo
+.vs/
+TestResults/
+artifacts/
+
+# Assistant and editor working state. Never published: agent and skill
+# definitions, session notes and local settings are working material, not part
+# of the product.
+.claude/
+.cursor/
+*.log
+
+# Anything staged for a real client solution. The fixture in data/ is synthetic
+# and is the only solution export that belongs in this repo.
+scratch/
+local/

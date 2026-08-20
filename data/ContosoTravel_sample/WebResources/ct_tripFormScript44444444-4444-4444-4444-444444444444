@@ -1,0 +1,8 @@
+// Trip form script (sample fixture content)
+function onLoad(executionContext) {
+    var formContext = executionContext.getFormContext();
+    var endDate = formContext.getAttribute("ct_enddate");
+    if (endDate && !endDate.getValue()) {
+        formContext.ui.setFormNotification("Set an end date before confirming bookings.", "INFO", "ct_enddate_hint");
+    }
+}

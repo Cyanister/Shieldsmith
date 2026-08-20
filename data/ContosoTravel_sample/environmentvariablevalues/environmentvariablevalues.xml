@@ -1,0 +1,5 @@
+<environmentvariablevalues>
+  <environmentvariablevalue schemaname="ct_SendEmails">
+    <value>yes</value>
+  </environmentvariablevalue>
+</environmentvariablevalues>
