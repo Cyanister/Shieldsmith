@@ -49,8 +49,10 @@ public static class SolutionTools
             environmentVariables = model.EnvironmentVariables.Count,
             canvasApps = model.CanvasApps.Count,
             agents = model.Agents.Count,
+            pluginAssemblies = model.PluginAssemblies.Count,
+            pluginSteps = model.SdkMessageSteps.Count,
             hint = "Use get_solution_summary, list_components, get_entity, get_flow, get_canvas_app, " +
-                   "get_agent, get_relationships or search next.",
+                   "get_agent, get_plugin, get_relationships or search next.",
         });
     }
 
@@ -86,6 +88,23 @@ public static class SolutionTools
                 topics = a.Topics.Count,
                 tools = a.Tools.Count,
                 knowledgeSources = a.KnowledgeSources.Count,
+            }),
+            businessProcessFlows = model.Processes
+                .Where(p => p.BusinessProcessFlow is not null)
+                .Select(p => new
+                {
+                    p.Name,
+                    p.PrimaryEntity,
+                    stages = p.BusinessProcessFlow!.Stages.Count,
+                    steps = p.BusinessProcessFlow.StepCount,
+                }),
+            pluginAssemblies = model.PluginAssemblies.Select(a => new
+            {
+                a.Name,
+                a.Version,
+                a.IsolationMode,
+                types = a.Types.Count,
+                registeredSteps = a.Steps.Count,
             }),
             securityRoles = model.SecurityRoles.Select(r => r.Name),
             environmentVariables = model.EnvironmentVariables.Select(v => new { v.SchemaName, type = v.TypeName }),
@@ -198,6 +217,19 @@ public static class SolutionTools
             } : null,
             actions = process.CloudFlow is null ? null : SerializeActions(process.CloudFlow.Actions),
             connectors = process.CloudFlow?.ConnectorsUsed,
+            // A business process flow is a stage list, not an action tree.
+            businessProcessFlow = process.BusinessProcessFlow is not { } bpf ? null : new
+            {
+                stages = bpf.Stages.Select(s => new
+                {
+                    s.Order,
+                    s.Name,
+                    steps = s.Steps.Select(step => new
+                    {
+                        step.Name, step.DataField, step.IsSystemControl,
+                    }),
+                }),
+            },
             // A desktop flow is a Robin script, not an action tree, so it has
             // its own shape: named subflows of ordered, nested action steps.
             desktopFlow = process.DesktopFlow is not { } desktop ? null : new
@@ -279,6 +311,62 @@ public static class SolutionTools
                 : null,
         });
     }
+
+    [McpServerTool, Description(
+        "A plugin assembly: the types it contains and every SDK message processing step " +
+        "registered against them, with message, table, pipeline stage, mode, rank and " +
+        "filtering columns. Omit assemblyName to list every registration in the solution, " +
+        "including those whose assembly ships elsewhere.")]
+    public static string get_plugin(
+        [Description("Solution unique name")] string solutionName,
+        [Description("Assembly name, e.g. Contoso.Travel.Plugins; omit for all registrations")]
+        string? assemblyName = null)
+    {
+        var model = Find(solutionName);
+
+        if (assemblyName is null)
+        {
+            return Serialize(new
+            {
+                assemblies = model.PluginAssemblies.Select(a => a.Name),
+                steps = model.SdkMessageSteps.Select(Describe),
+            });
+        }
+
+        var assembly = model.PluginAssemblies.FirstOrDefault(a =>
+                           string.Equals(a.Name, assemblyName, StringComparison.OrdinalIgnoreCase) ||
+                           a.FullName.StartsWith(assemblyName, StringComparison.OrdinalIgnoreCase))
+                       ?? throw new McpException(
+                           $"No plugin assembly named '{assemblyName}' in {model.UniqueName}. " +
+                           (model.PluginAssemblies.Count == 0
+                               ? "This solution contains none."
+                               : $"Assemblies: {string.Join(", ", model.PluginAssemblies.Select(a => a.Name))}."));
+
+        return Serialize(new
+        {
+            assembly.Name,
+            assembly.FullName,
+            assembly.Version,
+            assembly.IsolationMode,
+            types = assembly.Types.Select(t => new { name = t.DisplayName, t.AssemblyQualifiedName }),
+            steps = assembly.Steps.Select(Describe),
+        });
+    }
+
+    private static object Describe(SdkMessageStepModel step) => new
+    {
+        step.Name,
+        // Empty means the export does not settle it. Never inferred.
+        message = step.Message.Length > 0 ? step.Message : null,
+        step.PrimaryEntity,
+        step.Stage,
+        step.Mode,
+        step.Rank,
+        filteringAttributes = step.FilteringAttributes.Count > 0
+            ? (object)step.FilteringAttributes
+            : "all columns",
+        pluginType = step.PluginTypeName,
+    };
 
     [McpServerTool, Description(
         "A Copilot Studio agent: its instructions, topics with trigger phrases and message " +
@@ -390,6 +478,15 @@ public static class SolutionTools
             agentTopics = model.Agents.SelectMany(a => a.Topics
                     .Where(t => Hits(t.DisplayName, t.SchemaName))
                     .Select(t => new { agent = a.Name, t.DisplayName, triggers = t.TriggerQueries.Count }))
+                .Take(MaxListItems),
+            pluginSteps = model.SdkMessageSteps
+                .Where(s => Hits(s.Name, s.PrimaryEntity, s.PluginTypeName))
+                .Select(s => new { s.Name, s.PrimaryEntity, s.Stage }).Take(MaxListItems),
+            businessProcessStages = model.Processes
+                .Where(p => p.BusinessProcessFlow is not null)
+                .SelectMany(p => p.BusinessProcessFlow!.Stages
+                    .Where(st => Hits(st.Name))
+                    .Select(st => new { flow = p.Name, stage = st.Name, st.Order }))
                 .Take(MaxListItems),
             desktopFlowSteps = model.Processes
                 .Where(p => p.DesktopFlow is not null)

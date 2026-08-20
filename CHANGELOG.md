@@ -117,6 +117,21 @@ is generated from `Directory.Build.props`; it had sat at 0.4.0 against a 0.9.0 a
 Phase 5. The installer was compiled and tested for the first time: silent install, run the
 installed app and CLI end to end, add and remove the PATH entry, and uninstall.
 
+**Business process flows, plugins, and diagrams that survive a real solution.** Both diagram
+engines turned out to be broken on a hundred-table solution, because they had only ever been
+tested against the four-table fixture. Mermaid did not fail: past its default limits it draws a
+picture reading "Maximum text size in diagram exceeded" and returns it as a valid SVG, which was
+being written out as a solution's entity relationship diagram. The built-in engine crashed
+outright, because GDI+ throws from `new Bitmap()` long before it runs out of memory. Mermaid is
+now opt-in and its error diagrams are detected as failures; the rasteriser scales down to fit a
+pixel budget, falls back to the exact SVG, and one diagram failing no longer takes the rest with
+it. Above 25 tables the ERD drops to table names and says so.
+
+Business process flow stages and steps are now read from the workflow XAML, and plugin
+assemblies, types and SDK message processing steps from `customizations.xml`. PowerDocu
+documents neither. Both were written against real exports: a 16-stage flow, and an assembly with
+three types and four registrations.
+
 ## What is verified, and how
 
 - **65 unit tests** across Core, Outputs, Ai and Diagrams, all against the synthetic fixture.

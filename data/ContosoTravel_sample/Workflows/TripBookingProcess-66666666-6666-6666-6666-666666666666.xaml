@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  A business process flow, in the shape a real export produces. The stages are
+  ActivityReference elements typed StageComposite whose DisplayName carries a
+  generated "StageStepN: " prefix, and the steps inside are mcwb:Control
+  elements naming the column each one writes. Trimmed to what the parser reads:
+  a real file also carries the workflow plumbing around this.
+-->
+<Activity xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities"
+          xmlns:mxswa="clr-namespace:Microsoft.Xrm.Sdk.Workflow.Activities;assembly=Microsoft.Xrm.Sdk.Workflow"
+          xmlns:mcwb="clr-namespace:Microsoft.Crm.Workflow.BusinessProcessFlow;assembly=Microsoft.Crm.Workflow"
+          xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=mscorlib"
+          xmlns:mcwo="clr-namespace:Microsoft.Crm.Workflow.ObjectModel;assembly=Microsoft.Crm.Workflow"
+          xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <Sequence DisplayName="Trip booking process">
+    <mxswa:ActivityReference AssemblyQualifiedName="Microsoft.Crm.Workflow.Activities.StageComposite, Microsoft.Crm.Workflow, Version=9.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" DisplayName="StageStep3: Enquiry">
+      <mxswa:ActivityReference.Properties>
+        <sco:Collection x:TypeArguments="mcwo:StepLabel" x:Key="StepLabels">
+          <mcwo:StepLabel Description="Destination" LabelId="aaaaaaaa-0000-0000-0000-000000000001" LanguageCode="1033" />
+        </sco:Collection>
+        <Sequence DisplayName="Steps">
+          <mcwb:Control ClassId="270bd3db-d9af-4782-9025-509e298dec0a" ControlDisplayName="Destination" ControlId="ct_destinationid" DataFieldName="ct_destinationid" IsSystemControl="False" IsUnbound="False" SystemStepType="0" />
+          <mcwb:Control ClassId="270bd3db-d9af-4782-9025-509e298dec0a" ControlDisplayName="Start date" ControlId="ct_startdate" DataFieldName="ct_startdate" IsSystemControl="False" IsUnbound="False" SystemStepType="0" />
+        </Sequence>
+      </mxswa:ActivityReference.Properties>
+    </mxswa:ActivityReference>
+    <mxswa:ActivityReference AssemblyQualifiedName="Microsoft.Crm.Workflow.Activities.StageComposite, Microsoft.Crm.Workflow, Version=9.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" DisplayName="StageStep9: Quoted">
+      <mxswa:ActivityReference.Properties>
+        <Sequence DisplayName="Steps">
+          <mcwb:Control ClassId="270bd3db-d9af-4782-9025-509e298dec0a" ControlDisplayName="Budget" ControlId="ct_budget" DataFieldName="ct_budget" IsSystemControl="False" IsUnbound="False" SystemStepType="0" />
+        </Sequence>
+      </mxswa:ActivityReference.Properties>
+    </mxswa:ActivityReference>
+    <mxswa:ActivityReference AssemblyQualifiedName="Microsoft.Crm.Workflow.Activities.StageComposite, Microsoft.Crm.Workflow, Version=9.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" DisplayName="StageStep15: Booked">
+      <mxswa:ActivityReference.Properties>
+        <Sequence DisplayName="Steps">
+          <mcwb:Control ClassId="270bd3db-d9af-4782-9025-509e298dec0a" ControlDisplayName="Confirmed" ControlId="ct_confirmed" DataFieldName="ct_confirmed" IsSystemControl="False" IsUnbound="False" SystemStepType="0" />
+          <mcwb:Control ClassId="270bd3db-d9af-4782-9025-509e298dec0a" ControlDisplayName="Process stage" ControlId="stageid" DataFieldName="stageid" IsSystemControl="True" IsUnbound="False" SystemStepType="1" />
+        </Sequence>
+      </mxswa:ActivityReference.Properties>
+    </mxswa:ActivityReference>
+  </Sequence>
+</Activity>

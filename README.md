@@ -65,8 +65,11 @@ dialogue has shown you the exact payload.
 
 **Outputs**
 
-- **ERD** as Graphviz DOT, rendered to PNG and SVG when Graphviz is installed, or with the
-  built-in layout engine when it is not. Raw DOT is never shown as the answer.
+- **ERD** and a chart per cloud flow, drawn by the built-in layout engine, which has no
+  dependencies and never has to be installed. Mermaid is available with `--mermaid`, but it is
+  not the default: past its size limits it renders a picture of an error message and returns it
+  as a valid diagram, and it produces very tall strips for long flows. Above 25 tables the ERD
+  drops to table names, because every column at that size is unreadable.
 - **Word document**: cover page, table of contents that fills in on open, the ERD embedded,
   per-table detail, relationships, automations, roles, apps, and a parsing-notes section stating
   anything the export did not fully settle.
@@ -115,11 +118,18 @@ is genuinely good, particularly on canvas apps. An honest comparison:
 | Mermaid source you can paste anywhere | Yes | No |
 | Copilot Studio agents | Topics, trigger phrases, tools, knowledge | Yes |
 | Desktop flows | Robin script parsed into subflows and steps | Yes |
+| **Business process flows** | **Stages in order, and the column each step writes** | **No** |
+| **Plugins** | **Assemblies, types, and every registration with message, table, stage, mode, rank and filtering columns** | **No** |
+| Diagrams on a large solution | Built-in engine, degrades rather than failing | Rendered per flow and app |
 | AI models (AI Builder) | No | Yes |
 | Runtime required | None (self-contained) | .NET runtime |
 
-PowerDocu remains ahead on AI Builder models. Its canvas app coverage is also longer-established
-than Shieldsmith's, which was written against two real exports and the synthetic fixture.
+Business process flows and plugins are documented here and nowhere else that reads an export. A
+BPF's stage list exists only as Windows Workflow Foundation activities in its XAML, and a
+plugin's registrations exist only as message GUIDs in `customizations.xml`.
+
+PowerDocu remains ahead on AI Builder models, and its canvas app coverage is longer-established
+than Shieldsmith's.
 
 ## Projects
 
@@ -223,6 +233,11 @@ looking at it, not by trusting that the XAML compiled.
 - **winget.** `winget install Shieldsmith` needs a signed installer at a public URL first, so it
   follows the first signed release rather than shipping with it.
 - **AI Builder models.** The one component type PowerDocu documents and Shieldsmith does not.
+- **A readable ERD for a very large solution.** Above roughly 60 tables the single overview
+  diagram is a hairball whatever is done to it. The layered layout suits flowcharts; a dense
+  relationship graph is not a DAG and wants a different layout, or per-table neighbourhood
+  diagrams instead of one overview. Capping layer width was tried and measured, and made the
+  diagram wider rather than narrower.
 - **Visio verification.** The `.vsdx` passes structural tests, but Visio is not installed on the
   development machine, so open one in real Visio before shipping a change to the writer.
 

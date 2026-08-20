@@ -38,6 +38,9 @@
       <RootComponent type="60" id="{aaaaaaaa-0001-4000-8000-000000000001}" behavior="0" />
       <RootComponent type="300" schemaName="ct_tripplanner_a1b2c" behavior="0" />
       <RootComponent type="29" id="{55555555-5555-5555-5555-555555555555}" behavior="0" />
+      <RootComponent type="29" id="{66666666-6666-6666-6666-666666666666}" behavior="0" />
+      <RootComponent type="91" id="{77777777-7777-7777-7777-777777777777}" behavior="0" />
+      <RootComponent type="92" id="{aaaaaaaa-1111-2222-3333-444444444444}" behavior="0" />
     </RootComponents>
     <MissingDependencies />
   </SolutionManifest>

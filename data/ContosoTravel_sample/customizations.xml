@@ -556,7 +556,74 @@
         <LocalizedName languagecode="1033" description="Export bookings to Excel" />
       </LocalizedNames>
     </Workflow>
+    <Workflow WorkflowId="{66666666-6666-6666-6666-666666666666}" Name="Trip booking process">
+      <XamlFileName>/Workflows/TripBookingProcess-66666666-6666-6666-6666-666666666666.xaml</XamlFileName>
+      <Type>1</Type>
+      <Category>4</Category>
+      <StateCode>1</StateCode>
+      <StatusCode>2</StatusCode>
+      <UniqueName>ct_tripbookingprocess</UniqueName>
+      <BusinessProcessType>0</BusinessProcessType>
+      <PrimaryEntity>ct_trip</PrimaryEntity>
+      <LocalizedNames>
+        <LocalizedName languagecode="1033" description="Trip booking process" />
+      </LocalizedNames>
+    </Workflow>
   </Workflows>
+  <PluginAssemblies>
+    <PluginAssembly FullName="ContosoTravel.Plugins, Version=1.2.0.0, Culture=neutral, PublicKeyToken=aabbccddeeff0011" PluginAssemblyId="77777777-7777-7777-7777-777777777777" CustomizationLevel="1">
+      <IsolationMode>2</IsolationMode>
+      <SourceType>0</SourceType>
+      <IntroducedVersion>1.0</IntroducedVersion>
+      <FileName>/PluginAssemblies/ContosoTravelPlugins-77777777-7777-7777-7777-777777777777/ContosoTravel.Plugins.dll</FileName>
+      <PluginTypes>
+        <PluginType AssemblyQualifiedName="ContosoTravel.Plugins.BookingTotalPlugin, ContosoTravel.Plugins, Version=1.2.0.0, Culture=neutral, PublicKeyToken=aabbccddeeff0011" PluginTypeId="88888888-8888-8888-8888-888888888888" Name="ContosoTravel.Plugins.BookingTotalPlugin">
+          <FriendlyName>BookingTotalPlugin</FriendlyName>
+        </PluginType>
+        <PluginType AssemblyQualifiedName="ContosoTravel.Plugins.TripNumberPlugin, ContosoTravel.Plugins, Version=1.2.0.0, Culture=neutral, PublicKeyToken=aabbccddeeff0011" PluginTypeId="99999999-9999-9999-9999-999999999999" Name="ContosoTravel.Plugins.TripNumberPlugin">
+          <FriendlyName>TripNumberPlugin</FriendlyName>
+        </PluginType>
+      </PluginTypes>
+    </PluginAssembly>
+  </PluginAssemblies>
+  <SdkMessageProcessingSteps>
+    <SdkMessageProcessingStep Name="BookingTotalPlugin: Update of ct_booking" SdkMessageProcessingStepId="{aaaaaaaa-1111-2222-3333-444444444444}">
+      <SdkMessageId>20bebb1b-ea3e-db11-86a7-000a3a5473e8</SdkMessageId>
+      <PluginTypeName>ContosoTravel.Plugins.BookingTotalPlugin, ContosoTravel.Plugins, Version=1.2.0.0, Culture=neutral, PublicKeyToken=aabbccddeeff0011</PluginTypeName>
+      <PluginTypeId>88888888-8888-8888-8888-888888888888</PluginTypeId>
+      <PrimaryEntity>ct_booking</PrimaryEntity>
+      <FilteringAttributes>ct_cost,ct_bookingtype</FilteringAttributes>
+      <Mode>0</Mode>
+      <Rank>1</Rank>
+      <Stage>40</Stage>
+      <IsCustomizable>1</IsCustomizable>
+      <SdkMessageProcessingStepImages>
+        <SdkMessageProcessingStepImage Name="PreImage" />
+      </SdkMessageProcessingStepImages>
+    </SdkMessageProcessingStep>
+    <SdkMessageProcessingStep Name="TripNumberPlugin: Create of ct_trip" SdkMessageProcessingStepId="{bbbbbbbb-1111-2222-3333-444444444444}">
+      <SdkMessageId>9ebdbb1b-ea3e-db11-86a7-000a3a5473e8</SdkMessageId>
+      <PluginTypeName>ContosoTravel.Plugins.TripNumberPlugin, ContosoTravel.Plugins, Version=1.2.0.0, Culture=neutral, PublicKeyToken=aabbccddeeff0011</PluginTypeName>
+      <PluginTypeId>99999999-9999-9999-9999-999999999999</PluginTypeId>
+      <PrimaryEntity>ct_trip</PrimaryEntity>
+      <FilteringAttributes></FilteringAttributes>
+      <Mode>1</Mode>
+      <Rank>2</Rank>
+      <Stage>20</Stage>
+      <IsCustomizable>1</IsCustomizable>
+      <SdkMessageProcessingStepImages />
+    </SdkMessageProcessingStep>
+    <SdkMessageProcessingStep Name="Audit hook renamed by a maker" SdkMessageProcessingStepId="{cccccccc-1111-2222-3333-444444444444}">
+      <SdkMessageId>1ebdbb1b-ea3e-db11-86a7-000a3a5473e8</SdkMessageId>
+      <PluginTypeName>Contoso.Shared.AuditPlugin, Contoso.Shared, Version=3.0.0.0, Culture=neutral, PublicKeyToken=0011223344556677</PluginTypeName>
+      <PrimaryEntity>ct_traveller</PrimaryEntity>
+      <FilteringAttributes></FilteringAttributes>
+      <Mode>1</Mode>
+      <Rank>1</Rank>
+      <Stage>10</Stage>
+      <SdkMessageProcessingStepImages />
+    </SdkMessageProcessingStep>
+  </SdkMessageProcessingSteps>
   <CanvasApps>
     <CanvasApp>
       <Name>ct_tripplanner_a1b2c</Name>

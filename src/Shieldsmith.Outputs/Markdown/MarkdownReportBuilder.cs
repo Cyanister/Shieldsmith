@@ -260,6 +260,30 @@ public static class MarkdownReportBuilder
         File.WriteAllText(Path.Combine(dir, FileName(process.Name) + ".md"), md.ToString());
     }
 
+    private static void AppendSteps(StringBuilder md, IReadOnlyCollection<SdkMessageStepModel> steps)
+    {
+        if (steps.Count == 0)
+        {
+            md.AppendLine("No registered steps in this solution.");
+            md.AppendLine();
+            return;
+        }
+
+        md.AppendLine("| Message | Table | Stage | Mode | Rank | Filtering columns |");
+        md.AppendLine("| --- | --- | --- | --- | --- | --- |");
+        foreach (var step in steps.OrderBy(s => s.PrimaryEntity).ThenBy(s => s.Rank))
+        {
+            // An empty message is a fact about the export, not a formatting gap.
+            var message = step.Message.Length > 0 ? Escape(step.Message) : "*not in the export*";
+            var filtering = step.FilteringAttributes.Count > 0
+                ? string.Join(", ", step.FilteringAttributes.Select(a => $"`{a}`"))
+                : "all columns";
+            md.AppendLine($"| {message} | `{step.PrimaryEntity}` | {step.Stage} | {step.Mode} | " +
+                          $"{step.Rank} | {filtering} |");
+        }
+        md.AppendLine();
+    }
+
     private static void AppendActions(StringBuilder md, IEnumerable<FlowAction> actions, int depth)
     {
         foreach (var action in actions)
@@ -443,6 +467,66 @@ public static class MarkdownReportBuilder
                     }
                     md.AppendLine();
                 }
+            }
+        }
+
+        var businessProcessFlows = model.Processes.Where(p => p.BusinessProcessFlow is not null).ToList();
+        if (businessProcessFlows.Count > 0)
+        {
+            md.AppendLine("## Business process flows");
+            md.AppendLine();
+            foreach (var process in businessProcessFlows)
+            {
+                var detail = process.BusinessProcessFlow!;
+                md.AppendLine($"### {Escape(process.Name)}");
+                md.AppendLine();
+                md.AppendLine($"Runs on `{process.PrimaryEntity}`. " +
+                              $"{detail.Stages.Count} stages, {detail.StepCount} steps.");
+                md.AppendLine();
+                md.AppendLine("| # | Stage | Steps |");
+                md.AppendLine("| --- | --- | --- |");
+                foreach (var stage in detail.Stages)
+                {
+                    var steps = stage.Steps.Count == 0
+                        ? "none"
+                        : string.Join(", ", stage.Steps.Select(s =>
+                            s.DataField.Length > 0
+                                ? $"{Escape(s.Name)} (`{s.DataField}`)"
+                                : Escape(s.Name)));
+                    md.AppendLine($"| {stage.Order} | {Escape(stage.Name)} | {steps} |");
+                }
+                md.AppendLine();
+            }
+        }
+
+        if (model.PluginAssemblies.Count > 0 || model.SdkMessageSteps.Count > 0)
+        {
+            md.AppendLine("## Plugins");
+            md.AppendLine();
+            foreach (var assembly in model.PluginAssemblies)
+            {
+                md.AppendLine($"### {Escape(assembly.Name)}");
+                md.AppendLine();
+                md.AppendLine($"Version {assembly.Version}. Isolation: {assembly.IsolationMode}.");
+                md.AppendLine();
+                if (assembly.Types.Count > 0)
+                {
+                    md.AppendLine("Types: " +
+                        string.Join(", ", assembly.Types.Select(t => $"`{t.DisplayName}`")));
+                    md.AppendLine();
+                }
+                AppendSteps(md, assembly.Steps);
+            }
+
+            // Registrations whose assembly ships in another solution still
+            // matter: they run against this solution's tables.
+            var orphans = model.SdkMessageSteps
+                .Where(s => !model.PluginAssemblies.Any(a => a.Steps.Contains(s))).ToList();
+            if (orphans.Count > 0)
+            {
+                md.AppendLine("### Registrations whose assembly is not in this solution");
+                md.AppendLine();
+                AppendSteps(md, orphans);
             }
         }
 

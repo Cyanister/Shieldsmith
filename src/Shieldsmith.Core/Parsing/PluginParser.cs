@@ -90,7 +90,7 @@ public static class PluginParser
     /// there and only trusted when the table it names matches PrimaryEntity.
     /// A renamed step yields nothing rather than a guess.
     /// </summary>
-    internal static string MessageFrom(string stepName, string primaryEntity)
+    public static string MessageFrom(string stepName, string primaryEntity)
     {
         var match = Regex.Match(stepName, @":\s*(?<message>[A-Za-z]+)\s+of\s+(?<entity>\S+)\s*$");
         if (!match.Success) return string.Empty;

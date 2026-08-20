@@ -45,7 +45,7 @@ public sealed class SolutionParserTests : IDisposable
     [Fact]
     public void Root_components_carry_schema_names_and_ids()
     {
-        Assert.Equal(17, _model.RootComponents.Count);
+        Assert.Equal(20, _model.RootComponents.Count);
         var entityComponents = _model.RootComponents.Where(c => c.TypeCode == 1).ToList();
         Assert.Equal(4, entityComponents.Count);
         Assert.All(entityComponents, c => Assert.NotEqual(string.Empty, c.SchemaName));
@@ -53,7 +53,7 @@ public sealed class SolutionParserTests : IDisposable
         // Type 29 covers every process kind: cloud flows, classic workflows and
         // desktop flows all share it, and are told apart by Category.
         var flowComponents = _model.RootComponents.Where(c => c.TypeCode == 29).ToList();
-        Assert.Equal(4, flowComponents.Count);
+        Assert.Equal(5, flowComponents.Count);
         Assert.All(flowComponents, c => Assert.NotEqual(string.Empty, c.Id));
         // Braces are stripped from ids.
         Assert.DoesNotContain(flowComponents, c => c.Id.Contains('{'));

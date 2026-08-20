@@ -32,10 +32,11 @@ public sealed class FlowParserTests : IDisposable
     [Fact]
     public void All_processes_are_read_with_their_kinds()
     {
-        // Two cloud flows, one classic workflow, one desktop flow.
-        Assert.Equal(4, _model.Processes.Count);
+        // Two cloud flows, one classic workflow, one desktop flow, one BPF.
+        Assert.Equal(5, _model.Processes.Count);
         Assert.Equal(2, _model.Processes.Count(p => p.Kind == ProcessKind.CloudFlow));
         Assert.Equal(1, _model.Processes.Count(p => p.Kind == ProcessKind.DesktopFlow));
+        Assert.Equal(1, _model.Processes.Count(p => p.Kind == ProcessKind.BusinessProcessFlow));
         var classic = Assert.Single(_model.Processes, p => p.Kind == ProcessKind.ClassicWorkflow);
         Assert.Equal("Trip approval", classic.Name);
         Assert.Equal("ct_trip", classic.PrimaryEntity);

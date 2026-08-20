@@ -95,7 +95,7 @@ public static class BusinessProcessFlowParser
     /// noise in a document. A stage genuinely named with a colon keeps the rest
     /// of its name intact because only the first separator is removed.
     /// </summary>
-    internal static string StripStagePrefix(string displayName)
+    public static string StripStagePrefix(string displayName)
     {
         var separator = displayName.IndexOf(':');
         if (separator < 0) return displayName.Trim();

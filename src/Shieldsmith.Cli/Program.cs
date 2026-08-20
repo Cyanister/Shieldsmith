@@ -139,6 +139,28 @@ try
                                       $"{flow.DesktopFlow.Subflows.Count} subflows, " +
                                       $"modules {string.Join(", ", flow.DesktopFlow.Modules)}");
             }
+            var businessProcessFlows = model.Processes
+                .Where(p => p.BusinessProcessFlow is not null).ToList();
+            if (businessProcessFlows.Count > 0)
+            {
+                Console.WriteLine($"Business process flows: {businessProcessFlows.Count}");
+                foreach (var bpf in businessProcessFlows)
+                    Console.WriteLine($"  {bpf.Name} on {bpf.PrimaryEntity}: " +
+                                      $"{bpf.BusinessProcessFlow!.Stages.Count} stages " +
+                                      $"({string.Join(" > ", bpf.BusinessProcessFlow.Stages.Select(s => s.Name))})");
+            }
+
+            if (model.PluginAssemblies.Count > 0 || model.SdkMessageSteps.Count > 0)
+            {
+                Console.WriteLine($"Plugins:      {model.PluginAssemblies.Count} assemblies, " +
+                                  $"{model.SdkMessageSteps.Count} registered steps");
+                foreach (var assembly in model.PluginAssemblies)
+                    Console.WriteLine($"  {assembly.Name} v{assembly.Version} [{assembly.IsolationMode}]: " +
+                                      $"{assembly.Types.Count} types, {assembly.Steps.Count} steps");
+                foreach (var step in model.SdkMessageSteps)
+                    Console.WriteLine($"    {step.Summary}");
+            }
+
             Console.WriteLine($"Environment variables: {model.EnvironmentVariables.Count}");
             foreach (var variable in model.EnvironmentVariables)
                 Console.WriteLine($"  {variable.SchemaName} ({variable.TypeName})" +

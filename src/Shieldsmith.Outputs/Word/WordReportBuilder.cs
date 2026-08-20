@@ -320,6 +320,58 @@ public static class WordReportBuilder
             }
         }
 
+        // Business process flows: the stage list, which exists nowhere else
+        // outside the designer.
+        var businessProcessFlows = model.Processes.Where(p => p.BusinessProcessFlow is not null).ToList();
+        if (businessProcessFlows.Count > 0)
+        {
+            body.Append(Styled(WordStyles.Heading1, "Business process flows"));
+            foreach (var process in businessProcessFlows)
+            {
+                var detail = process.BusinessProcessFlow!;
+                body.Append(Styled(WordStyles.Heading2, process.Name));
+                body.Append(Text($"{(process.IsActive ? "Active" : "Draft")}. Runs on {process.PrimaryEntity}. " +
+                                 $"{detail.Stages.Count} stages, {detail.StepCount} steps."));
+
+                var rows = new List<string[]> { new[] { "#", "Stage", "Steps" } };
+                foreach (var stage in detail.Stages)
+                {
+                    var steps = stage.Steps.Count == 0
+                        ? "none"
+                        : string.Join(", ", stage.Steps.Select(s =>
+                            s.DataField.Length > 0 ? $"{s.Name} ({s.DataField})" : s.Name));
+                    rows.Add(new[] { stage.Order.ToString(), stage.Name, steps });
+                }
+                body.Append(DataTable(rows));
+            }
+        }
+
+        // Plugins. Nothing else that reads an export documents these.
+        if (model.PluginAssemblies.Count > 0 || model.SdkMessageSteps.Count > 0)
+        {
+            body.Append(Styled(WordStyles.Heading1, "Plugins"));
+            foreach (var assembly in model.PluginAssemblies)
+            {
+                body.Append(Styled(WordStyles.Heading2, assembly.Name));
+                body.Append(Text($"Version {assembly.Version}. Isolation: {assembly.IsolationMode}. " +
+                                 $"{assembly.Types.Count} type(s)."));
+                if (assembly.Types.Count > 0)
+                    body.Append(Text("Types: " + string.Join(", ", assembly.Types.Select(t => t.DisplayName))));
+                AppendPluginSteps(body, assembly.Steps);
+            }
+
+            var unowned = model.SdkMessageSteps
+                .Where(s => !model.PluginAssemblies.Any(a => a.Steps.Contains(s))).ToList();
+            if (unowned.Count > 0)
+            {
+                body.Append(Styled(WordStyles.Heading2,
+                    "Registrations whose assembly is not in this solution"));
+                body.Append(Text("These steps run against this solution's tables, but the code that " +
+                                 "implements them ships elsewhere."));
+                AppendPluginSteps(body, unowned);
+            }
+        }
+
         // Desktop flows.
         var desktopFlows = model.Processes.Where(p => p.DesktopFlow is not null).ToList();
         if (desktopFlows.Count > 0)
@@ -687,6 +739,38 @@ public static class WordReportBuilder
 
     private static TableCell PlainCell(string text) =>
         new(new Paragraph(new Run(new Text(text) { Space = SpaceProcessingModeValues.Preserve })));
+
+    private static void AppendPluginSteps(Body body, IReadOnlyCollection<SdkMessageStepModel> steps)
+    {
+        if (steps.Count == 0)
+        {
+            body.Append(Text("No registered steps in this solution."));
+            return;
+        }
+
+        var rows = new List<string[]>
+        {
+            new[] { "Message", "Table", "Stage", "Mode", "Rank", "Filtering columns" },
+        };
+        foreach (var step in steps.OrderBy(s => s.PrimaryEntity).ThenBy(s => s.Rank))
+        {
+            // The export carries a message GUID, not a name. Where the name
+            // could not be recovered this says so rather than leaving a blank
+            // cell that reads as "no message".
+            rows.Add(new[]
+            {
+                step.Message.Length > 0 ? step.Message : "not stated in the export",
+                step.PrimaryEntity,
+                step.Stage,
+                step.Mode,
+                step.Rank.ToString(),
+                step.FilteringAttributes.Count > 0
+                    ? string.Join(", ", step.FilteringAttributes)
+                    : "all columns",
+            });
+        }
+        body.Append(DataTable(rows));
+    }
 
     private static void AppendImage(MainDocumentPart mainPart, Body body, string pngPath)
     {
