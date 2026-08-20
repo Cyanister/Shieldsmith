@@ -2,10 +2,22 @@
 
   <PropertyGroup>
     <Version>0.9.0</Version>
+    <!-- One English resource set, not two dozen satellite languages. -->
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
     <Product>Shieldsmith</Product>
     <Company>Cameron Shields</Company>
     <Authors>Cameron Shields</Authors>
     <Copyright>Copyright © Cameron Shields</Copyright>
+  </PropertyGroup>
+
+  <!--
+    Release builds ship no debug symbols. A .pdb in a public download is dead
+    weight and leaks the absolute paths of the machine that built it.
+  -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

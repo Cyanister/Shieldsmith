@@ -15,6 +15,36 @@ query live.
 The principle underneath it: **read the definition, not the documentation.** The solution file
 is what is actually true.
 
+Apache 2.0 licensed. Windows x64.
+
+## Install
+
+Two ways in, both self-contained. There is no .NET runtime to install first, which is the
+single most common complaint against the alternatives.
+
+**Installer.** Download `Shieldsmith-<version>-setup.exe` and run it. About 53 MB to download,
+178 MB installed. It installs for you alone, so there is **no administrator prompt** and it
+works on a locked-down work machine. You get a Start Menu entry, an optional desktop shortcut,
+and an optional PATH entry for the command line tool. Uninstall from Add or Remove Programs
+removes everything it added, including the PATH entry.
+
+**Portable zip.** Download `Shieldsmith-<version>-win-x64-portable.zip`, unzip it anywhere, and
+run `Shieldsmith.exe`. Nothing is written to the registry and nothing is installed. Use this if
+you cannot install software at all, or want to run it from a USB stick.
+
+Windows will warn you about an unrecognised publisher until the release is code signed. That is
+being fixed; see [Still open](#still-open).
+
+### Then
+
+1. Export a solution from Power Platform, managed or unmanaged.
+2. Drag the `.zip` onto the Shieldsmith window and press **Analyse solution**.
+3. Read the results, then write a Word document, a Markdown set, a Visio diagram, or a docpack
+   for Claude Code.
+
+Nothing leaves your machine unless you deliberately turn AI on, and even then only after a
+dialogue has shown you the exact payload.
+
 ## What it produces
 
 **Extracted fact**
@@ -141,15 +171,28 @@ Register the MCP server with Claude Code:
 claude mcp add shieldsmith -- <install-dir>\Shieldsmith.Mcp.exe
 ```
 
-## Packaging
+## Building a release
 
 ```
-pwsh build/publish.ps1          # self-contained win-x64 single-file executables
-iscc build/Shieldsmith.iss           # installer (after publishing)
+powershell -File build/publish.ps1              # payload + portable zip + version.iss
+build/sign.ps1 -CertificateThumbprint <hash>    # sign every exe (see the script for options)
+iscc build/Shieldsmith.iss                      # installer, into artifacts/
 ```
 
-Sign the executables before any public release. Unsigned builds trigger SmartScreen, which is a
-live complaint against PowerDocu and the first thing a new user hits.
+`publish.ps1` puts all three executables in **one** folder so the .NET and WPF runtime ships
+once rather than three times. Published as single-file executables instead, the same payload is
+439 MB rather than 174 MB, which is a lot to ask someone to download for a documentation tool.
+
+Because they share a folder and Windows file names are case-insensitive, the CLI is
+`shieldsmith-cli.exe` and a `shieldsmith.cmd` shim sits beside it, so `shieldsmith` is still
+what you type.
+
+The installer version is read from `Directory.Build.props` via a generated `build/version.iss`.
+It is not typed into the installer script, because when it was it sat at 0.4.0 against a 0.9.0
+application for four phases.
+
+Sign before any public release. Unsigned builds trigger SmartScreen, which is a live complaint
+against PowerDocu and the first thing a new user hits.
 
 ## The desktop app
 
@@ -171,7 +214,17 @@ Shieldsmith produces, how to use it, and exactly where your data does and does n
 and of the About and consent windows, then exits. That is how the interface is checked: by
 looking at it, not by trusting that the XAML compiled.
 
-## Not done yet
+## Still open
 
-AI Builder models. The licence and distribution model are undecided; `IEditionGate` in
-`Shieldsmith.Core` is the single seam that keeps free, open-source and freemium all possible.
+- **Code signing.** The release is not signed yet, so Windows shows an unrecognised publisher
+  warning. `build/sign.ps1` is ready and documents both routes; it needs a certificate, and
+  Azure Trusted Signing is the recommended one because reputation builds against Microsoft's
+  root rather than a fresh certificate.
+- **winget.** `winget install Shieldsmith` needs a signed installer at a public URL first, so it
+  follows the first signed release rather than shipping with it.
+- **AI Builder models.** The one component type PowerDocu documents and Shieldsmith does not.
+- **Visio verification.** The `.vsdx` passes structural tests, but Visio is not installed on the
+  development machine, so open one in real Visio before shipping a change to the writer.
+
+Licensed under Apache 2.0. `IEditionGate` in `Shieldsmith.Core` remains the single seam if a
+paid edition is ever added; the code stays open either way.

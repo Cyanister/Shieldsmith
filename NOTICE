@@ -1,0 +1,64 @@
+Shieldsmith
+Copyright 2026 Cameron Shields
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+this file except in compliance with the License. You may obtain a copy of the
+License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed
+under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+CONDITIONS OF ANY KIND, either express or implied. See the License for the
+specific language governing permissions and limitations under the License.
+
+--------------------------------------------------------------------------------
+Third-party components
+--------------------------------------------------------------------------------
+
+Licences below are as declared in each package's own metadata. Where a package
+declares a licence file rather than an identifier, the file it ships is
+authoritative.
+
+Redistributed inside a Shieldsmith build:
+
+  Mermaid                                     MIT
+    https://github.com/mermaid-js/mermaid
+    Bundled as src/Shieldsmith.Mermaid/Assets/mermaid.min.js and embedded in the
+    Shieldsmith.Mermaid assembly. Diagrams are rendered locally; the bundled copy
+    is the reason no network access is needed to draw one.
+
+  Anthropic .NET SDK                12.9.0    MIT
+  DocumentFormat.OpenXml             3.1.0    MIT
+  Microsoft.Extensions.Hosting     10.0.11    MIT
+  ModelContextProtocol               2.2.0    Apache-2.0
+  OpenAI .NET SDK                    2.1.0    licence not declared in package
+                                              metadata; see
+                                              https://github.com/openai/openai-dotnet
+  System.Drawing.Common              9.0.0    MIT
+  System.IO.Packaging               10.0.0    MIT
+  System.Security.Cryptography.ProtectedData
+                                     9.0.0    MIT
+  Microsoft.Web.WebView2       1.0.3351.48    Microsoft software licence terms,
+                                              shipped as LICENSE.txt in the
+                                              package
+
+  .NET runtime and the Windows Presentation Foundation libraries are
+  redistributed as part of the self-contained build, under the MIT licence.
+
+Detected at runtime, never redistributed:
+
+  Graphviz                                    Eclipse Public License 1.0
+    https://graphviz.org
+    Optional. Shieldsmith locates an existing installation and shells out to it.
+    No Graphviz binary is bundled or installed. If a future build does bundle
+    one, its licence must ship alongside and this notice must say so.
+
+  Microsoft Edge WebView2 Runtime             Microsoft software licence terms
+    Required for Mermaid rendering, and present on current Windows 11 installs.
+    Shieldsmith detects it and falls back to its own layout engine when it is
+    absent. The runtime itself is never installed by Shieldsmith.
+
+  Claude Code CLI                             Anthropic
+    Optional AI provider. Detected on PATH and run with the user's own
+    subscription. Never bundled.

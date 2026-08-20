@@ -5,7 +5,14 @@
     <TargetFramework>net10.0-windows</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <AssemblyName>shieldsmith</AssemblyName>
+    <!--
+      Not "shieldsmith": the app publishes as Shieldsmith.exe and all three
+      executables now share one folder so the .NET runtime is shipped once
+      rather than three times. Windows file names are case-insensitive, so
+      Shieldsmith.exe and shieldsmith.exe cannot coexist. The installer drops a
+      shieldsmith.cmd shim beside this, so users still type "shieldsmith".
+    -->
+    <AssemblyName>shieldsmith-cli</AssemblyName>
     <RootNamespace>Shieldsmith.Cli</RootNamespace>
   </PropertyGroup>
 

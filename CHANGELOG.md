@@ -38,8 +38,14 @@ Made once, recorded here so they are not relitigated.
   declared ones and always labelled inferred.
 - **A missing engine is a supported state, not an error.** Graphviz, WebView2 and Claude Code
   are each optional, detected at runtime, and reported to the user before they are needed.
-- **Distribution and licence are undecided.** `IEditionGate` in `Shieldsmith.Core` is the only
-  licensing seam and exists to keep free, open-source and freemium all possible.
+- **Apache 2.0, and open source.** Chosen over MIT for the explicit patent grant and the
+  requirement that modified files be marked, and over AGPL because an employer ban on copyleft
+  would cost more adoption than a closed fork would cost in revenue. `IEditionGate` in
+  `Shieldsmith.Core` remains the only licensing seam if a paid edition is ever added; the code
+  stays open either way.
+- **Installing must be trivial.** A signed installer and a portable zip, both self-contained,
+  per-user so there is no administrator prompt on a locked-down work machine. Needing a .NET
+  runtime first, or needing to build from source, is the barrier this project set out to remove.
 
 ## Version history
 
@@ -102,6 +108,15 @@ server name and the docs. Brand assets applied. An About window added, stating t
 build date, the runtime, which engines this machine has, which solution is loaded, what the tool
 produces, how to use it, and where the data does and does not go.
 
+**Packaging.** Apache 2.0 licence and a NOTICE listing every third-party component, with the
+licences read from the packages' own metadata rather than assumed. All three executables now
+publish into one folder sharing a single copy of the .NET and WPF runtime: 174 MB rather than
+the 439 MB that single-file-per-executable produced. Release builds ship no debug symbols and
+no IntelliSense XML, so no local source paths leak into a public download. The installer version
+is generated from `Directory.Build.props`; it had sat at 0.4.0 against a 0.9.0 application since
+Phase 5. The installer was compiled and tested for the first time: silent install, run the
+installed app and CLI end to end, add and remove the PATH entry, and uninstall.
+
 ## What is verified, and how
 
 - **65 unit tests** across Core, Outputs, Ai and Diagrams, all against the synthetic fixture.
@@ -115,6 +130,11 @@ produces, how to use it, and where the data does and does not go.
   way and none of them failed the build.
 - **MCP is driven end to end over stdio**, sequentially, as a real client does. Firing the
   requests concurrently produces answers in the wrong order and proves nothing.
+- **The installer is installed, not just compiled.** Silent install to a scratch directory, the
+  installed app and CLI both run and produce real documents, the PATH entry is added when the
+  task is chosen and the user's PATH is left untouched when it is not, and uninstall removes the
+  directory and restores PATH byte for byte. The PATH was backed up before that test, because
+  the uninstall code that edits it was newly written and untested.
 - **Canvas app parsing was verified against two real solutions**, not just the fixture: a
   four-screen app reporting 321 controls, seven tables and four variables, and a second
   correctly identified as a component library.
