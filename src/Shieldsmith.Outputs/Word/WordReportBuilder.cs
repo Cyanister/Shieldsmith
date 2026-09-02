@@ -636,7 +636,19 @@ public static class WordReportBuilder
         {
             var indent = new string(' ', depth * 4);
             rows.Add(new[] { indent + action.DisplayName, action.OperationDisplay });
-            AppendActionRows(rows, action.Children, depth + 1);
+
+            // Each branch gets a heading row, so a condition's Yes and No paths
+            // are distinguishable rather than one undifferentiated list.
+            foreach (var branch in action.Branches)
+            {
+                var childDepth = depth + 1;
+                if (branch.Label.Length > 0)
+                {
+                    rows.Add(new[] { new string(' ', childDepth * 4) + branch.Label, string.Empty });
+                    childDepth++;
+                }
+                AppendActionRows(rows, branch.Actions, childDepth);
+            }
         }
     }
 

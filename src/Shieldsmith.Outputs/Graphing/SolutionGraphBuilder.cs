@@ -115,6 +115,7 @@ public static class SolutionGraphBuilder
         var idByName = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         var exitsByName = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
         var order = new List<FlowAction>();
+        var previousExits = entryIds.ToList();
 
         foreach (var action in actions)
         {
@@ -132,13 +133,15 @@ public static class SolutionGraphBuilder
             node.ClusterId = clusterId;
 
             // A named predecessor that is a sibling wires to that sibling's
-            // exits; anything unresolved falls back to the sequence entry, which
-            // is what the first action in a list always uses.
+            // exits. With no usable runAfter, follow the previous sibling rather
+            // than the sequence entry: only the first action in a list starts
+            // from the entry, and treating every unnamed action as starting
+            // there would draw a sequential list as a parallel fan.
             var predecessors = new List<string>();
             foreach (var name in action.RunAfter)
                 if (exitsByName.TryGetValue(name, out var exits)) predecessors.AddRange(exits);
                 else if (idByName.TryGetValue(name, out var sibling)) predecessors.Add(sibling);
-            if (predecessors.Count == 0) predecessors.AddRange(entryIds);
+            if (predecessors.Count == 0) predecessors.AddRange(previousExits);
 
             foreach (var from in predecessors.Distinct())
                 graph.AddEdge(from, id);
@@ -146,6 +149,7 @@ public static class SolutionGraphBuilder
             exitsByName[action.Name] = action.Branches.Count > 0
                 ? AddContainer(graph, action, id, clusterId, ref counter)
                 : new List<string> { id };
+            previousExits = exitsByName[action.Name];
         }
 
         // Anything after this sequence runs after whatever nothing else ran

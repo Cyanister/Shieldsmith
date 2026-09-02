@@ -290,7 +290,20 @@ public static class MarkdownReportBuilder
         {
             md.AppendLine($"{new string(' ', depth * 2)}- {Escape(action.DisplayName)}" +
                           (string.IsNullOrEmpty(action.OperationDisplay) ? string.Empty : $" — {action.OperationDisplay}"));
-            AppendActions(md, action.Children, depth + 1);
+
+            // Nested actions are listed under the branch they belong to. Without
+            // the branch heading a condition's two paths read as one list and
+            // there is no way to tell which steps run when.
+            foreach (var branch in action.Branches)
+            {
+                var childDepth = depth + 1;
+                if (branch.Label.Length > 0)
+                {
+                    md.AppendLine($"{new string(' ', childDepth * 2)}- **{Escape(branch.Label)}**");
+                    childDepth++;
+                }
+                AppendActions(md, branch.Actions, childDepth);
+            }
         }
     }
 

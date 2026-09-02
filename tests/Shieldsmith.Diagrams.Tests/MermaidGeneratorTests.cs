@@ -1,3 +1,4 @@
+﻿using System.Text.RegularExpressions;
 using Shieldsmith.Core.Models;
 using Shieldsmith.Core.Parsing;
 using Shieldsmith.Outputs.Mermaid;
@@ -118,7 +119,24 @@ public sealed class MermaidGeneratorTests : IDisposable
         Assert.Contains("Scope", mermaid);
         Assert.Contains("Inner", mermaid);
         Assert.Contains("After", mermaid);
+
+        // The scope's contents are boxed rather than inlined.
+        Assert.Contains("subgraph", mermaid);
+
         // The chain continues from the nested child, not from the scope itself.
-        Assert.Contains("n1 --> n2", mermaid);
+        // Asserted by id lookup rather than a literal "n1 --> n2", which broke
+        // the moment a subgraph started consuming an id of its own.
+        var inner = NodeId(mermaid, "Inner");
+        var after = NodeId(mermaid, "After");
+        Assert.Contains($"{inner} --> {after}", mermaid);
+    }
+
+    /// <summary>The generated id of the node whose label is <paramref name="label"/>.</summary>
+    private static string NodeId(string mermaid, string label)
+    {
+        var match = Regex.Match(mermaid, $@"^\s*(?<id>\w+)[\[\{{(]+""{Regex.Escape(label)}""",
+            RegexOptions.Multiline);
+        Assert.True(match.Success, $"No node found for '{label}' in:\n{mermaid}");
+        return match.Groups["id"].Value;
     }
 }

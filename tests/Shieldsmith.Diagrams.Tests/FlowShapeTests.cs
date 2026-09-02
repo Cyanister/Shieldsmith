@@ -129,6 +129,38 @@ public sealed class FlowShapeTests
     }
 
     [Fact]
+    public void Actions_without_run_after_still_follow_the_previous_one()
+    {
+        // Only the first action in a list starts from the entry. Treating every
+        // action with no runAfter as starting there turns a sequential list into
+        // a parallel fan, which is the opposite of the bug this all fixes.
+        var graph = SolutionGraphBuilder.BuildFlow(Flow(
+            new FlowAction { Name = "One", Type = "Compose" },
+            new FlowAction { Name = "Two", Type = "Compose" },
+            new FlowAction { Name = "Three", Type = "Compose" }));
+
+        var one = graph.Nodes.Single(n => n.Title == "One").Id;
+        var two = graph.Nodes.Single(n => n.Title == "Two").Id;
+        var three = graph.Nodes.Single(n => n.Title == "Three").Id;
+
+        Assert.Contains(graph.Edges, e => e.FromId == one && e.ToId == two);
+        Assert.Contains(graph.Edges, e => e.FromId == two && e.ToId == three);
+        Assert.DoesNotContain(graph.Edges, e => e.FromId == "__trigger" && e.ToId == two);
+    }
+
+    [Fact]
+    public void Control_continues_from_inside_a_container_not_from_its_header()
+    {
+        var scope = Branching("Try", "Scope", (string.Empty, new[] { "Inner" }));
+        var after = new FlowAction { Name = "After", Type = "Compose" };
+        var graph = SolutionGraphBuilder.BuildFlow(Flow(scope, after));
+
+        var inner = graph.Nodes.Single(n => n.Title == "Inner").Id;
+        var afterId = graph.Nodes.Single(n => n.Title == "After").Id;
+        Assert.Contains(graph.Edges, e => e.FromId == inner && e.ToId == afterId);
+    }
+
+    [Fact]
     public void A_cluster_box_encloses_every_node_inside_it()
     {
         var scope = Branching("Try", "Scope", (string.Empty, new[] { "First", "Second" }));

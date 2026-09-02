@@ -81,7 +81,7 @@ public static class MermaidGenerator
 
         var counter = 0;
         var truncated = false;
-        Emit(mermaid, process.CloudFlow.Actions, "trigger", ref counter, maxNodes, ref truncated);
+        Emit(mermaid, process.CloudFlow.Actions, new[] { "trigger" }, ref counter, maxNodes, ref truncated);
         if (truncated)
             mermaid.AppendLine("    truncated[\"Diagram truncated; see the step table\"]");
 
@@ -91,30 +91,88 @@ public static class MermaidGenerator
         return mermaid.ToString();
     }
 
-    private static string Emit(StringBuilder mermaid, IReadOnlyList<FlowAction> actions,
-        string parentId, ref int counter, int maxNodes, ref bool truncated)
+    /// <summary>
+    /// Emits one list of sibling actions and returns the ids anything following
+    /// them should attach to. Mirrors the built-in engine: order comes from
+    /// runAfter so parallel actions stay parallel, and a container becomes a
+    /// Mermaid subgraph so its contents are boxed rather than inlined.
+    /// </summary>
+    private static List<string> Emit(StringBuilder mermaid, IReadOnlyList<FlowAction> actions,
+        IReadOnlyList<string> entryIds, ref int counter, int maxNodes, ref bool truncated)
     {
-        var previousId = parentId;
+        if (actions.Count == 0) return entryIds.ToList();
+
+        var idByName = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        var exitsByName = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+        var previousExits = entryIds.ToList();
+
         foreach (var action in actions)
         {
-            if (counter >= maxNodes) { truncated = true; return previousId; }
+            if (counter >= maxNodes) { truncated = true; break; }
 
             var id = $"n{counter++}";
-            var label = Label(action.DisplayName);
-            var shape = action.Type.Equals("If", StringComparison.OrdinalIgnoreCase)
-                        || action.Type.Equals("Switch", StringComparison.OrdinalIgnoreCase)
-                ? $"{id}{{{{\"{label}\"}}}}"
-                : $"{id}[\"{label}\"]";
+            idByName[action.Name] = id;
 
-            mermaid.AppendLine($"    {shape}");
-            mermaid.AppendLine($"    {previousId} --> {id}");
+            var label = Label(action.DisplayName);
+            var isBranching = action.Type.Equals("If", StringComparison.OrdinalIgnoreCase)
+                              || action.Type.Equals("Switch", StringComparison.OrdinalIgnoreCase);
+            mermaid.AppendLine(isBranching
+                ? $"    {id}{{{{\"{label}\"}}}}"
+                : $"    {id}[\"{label}\"]");
             mermaid.AppendLine($"    class {id} step;");
 
-            previousId = action.Children.Count > 0
-                ? Emit(mermaid, action.Children, id, ref counter, maxNodes, ref truncated)
-                : id;
+            var predecessors = new List<string>();
+            foreach (var name in action.RunAfter)
+                if (exitsByName.TryGetValue(name, out var exits)) predecessors.AddRange(exits);
+                else if (idByName.TryGetValue(name, out var sibling)) predecessors.Add(sibling);
+            // With no usable runAfter, follow the previous sibling; only the
+            // first action in a list starts from the sequence entry.
+            if (predecessors.Count == 0) predecessors.AddRange(previousExits);
+
+            foreach (var from in predecessors.Distinct())
+                mermaid.AppendLine($"    {from} --> {id}");
+
+            exitsByName[action.Name] = action.Branches.Count > 0
+                ? EmitContainer(mermaid, action, id, ref counter, maxNodes, ref truncated)
+                : new List<string> { id };
+            previousExits = exitsByName[action.Name];
         }
-        return previousId;
+
+        var consumed = actions.SelectMany(a => a.RunAfter)
+            .Where(idByName.ContainsKey)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var leaves = actions
+            .Where(a => idByName.ContainsKey(a.Name) && !consumed.Contains(a.Name))
+            .SelectMany(a => exitsByName[a.Name])
+            .Distinct()
+            .ToList();
+        return leaves.Count > 0 ? leaves : entryIds.ToList();
+    }
+
+    private static List<string> EmitContainer(StringBuilder mermaid, FlowAction action,
+        string headerId, ref int counter, int maxNodes, ref bool truncated)
+    {
+        var exits = new List<string>();
+        foreach (var branch in action.Branches)
+        {
+            if (counter >= maxNodes) { truncated = true; break; }
+
+            // A subgraph is Mermaid's box-around-a-group. The title is what
+            // makes a Catch scope legible as a Catch scope.
+            var groupId = $"g{counter++}";
+            var title = branch.Label.Length > 0
+                ? $"{Label(action.DisplayName)}: {Label(branch.Label)}"
+                : Label(action.DisplayName);
+            mermaid.AppendLine($"    subgraph {groupId} [\"{title}\"]");
+
+            var branchExits = Emit(mermaid, branch.Actions, new[] { headerId },
+                ref counter, maxNodes, ref truncated);
+
+            mermaid.AppendLine("    end");
+            exits.AddRange(branchExits);
+        }
+
+        return exits.Count > 0 ? exits : new List<string> { headerId };
     }
 
     /// <summary>Mermaid node ids must be identifier-safe.</summary>
