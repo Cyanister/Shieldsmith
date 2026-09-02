@@ -102,7 +102,10 @@ public sealed class MermaidGeneratorTests : IDisposable
     {
         var process = new ProcessModel { Name = "Nested", Category = 5 };
         var scope = new FlowAction { Name = "Scope", Type = "Scope" };
-        scope.Children.Add(new FlowAction { Name = "Inner", Type = "Compose" });
+        // Nested actions live in branches now; Children is the flattened view.
+        var body = new FlowBranch();
+        body.Actions.Add(new FlowAction { Name = "Inner", Type = "Compose" });
+        scope.Branches.Add(body);
         process.CloudFlow = new CloudFlowDetail
         {
             Trigger = new FlowTrigger { Name = "t", Type = "Request" },

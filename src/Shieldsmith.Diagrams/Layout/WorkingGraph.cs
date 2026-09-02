@@ -65,13 +65,20 @@ internal sealed class WorkingGraph
 
     public void RemoveEdge(WorkingEdge edge) => _edges.Remove(edge);
 
+    /// <summary>
+    /// Width and height reserved by a dummy node, which is the corridor a long
+    /// edge travels through. One pixel leaves an edge no room of its own and it
+    /// ends up drawn under the boxes on either side.
+    /// </summary>
+    public const double DummyExtent = 18;
+
     public int AddDummy(int layer, Graph graph)
     {
         var node = new Node
         {
             Id = $"__dummy_{_nodes.Count}",
             IsDummy = true,
-            Width = 1,
+            Width = DummyExtent,
             Height = 1,
         };
         var index = _nodes.Count;

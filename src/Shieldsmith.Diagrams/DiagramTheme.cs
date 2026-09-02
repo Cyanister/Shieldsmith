@@ -17,6 +17,8 @@ public sealed class DiagramTheme
     public string Surface { get; set; } = "#FFFFFF";
     public string Canvas { get; set; } = "#FFFFFF";
     public string EdgeColour { get; set; } = "#64748B";
+    /// <summary>Fill behind a scope or branch box; faint enough to sit under nodes.</summary>
+    public string ClusterFill { get; set; } = "#F8FDFD";
 
     public string FontFamily { get; set; } = "Inter, Segoe UI, system-ui, sans-serif";
     /// <summary>Concrete family used for measurement and PNG drawing.</summary>

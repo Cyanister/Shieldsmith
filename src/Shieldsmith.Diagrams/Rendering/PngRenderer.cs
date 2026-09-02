@@ -60,6 +60,10 @@ public static class PngRenderer
             graphics.ScaleTransform((float)scale, (float)scale);
             graphics.Clear(Parse(theme.Canvas));
 
+            // Clusters first, outermost first, so nesting reads correctly.
+            foreach (var cluster in graph.Clusters.Where(c => c.HasBounds).OrderBy(graph.DepthOf))
+                DrawCluster(graphics, cluster, graph.DepthOf(cluster), theme);
+
             // Edges, then nodes, then edge labels, so labels sit on top.
             foreach (var edge in graph.Edges) DrawEdge(graphics, edge, theme);
             foreach (var node in graph.Nodes.Where(n => !n.IsDummy)) DrawNode(graphics, node, theme);
@@ -67,6 +71,35 @@ public static class PngRenderer
         }
 
         bitmap.Save(outputPath, ImageFormat.Png);
+    }
+
+    /// <summary>The box around a scope, loop or branch. Mirrors SvgRenderer.RenderCluster.</summary>
+    private static void DrawCluster(Graphics g, Cluster cluster, int depth, DiagramTheme theme)
+    {
+        var accent = Parse(cluster.AccentColour ?? theme.Primary);
+        var bounds = new RectangleF((float)cluster.Left, (float)cluster.Top,
+            (float)cluster.Width, (float)cluster.Height);
+
+        using (var fill = new SolidBrush(Parse(depth % 2 == 0 ? theme.ClusterFill : theme.Canvas)))
+        using (var path = RoundedRect(bounds, 10f))
+        {
+            g.FillPath(fill, path);
+            using var pen = new Pen(accent, 1.2f) { DashPattern = new[] { 6f, 4f } };
+            g.DrawPath(pen, path);
+        }
+
+        var label = cluster.Subtitle is { Length: > 0 } && !string.Equals(cluster.Subtitle, cluster.Label,
+                        StringComparison.OrdinalIgnoreCase)
+            ? $"{cluster.Label}  ·  {cluster.Subtitle}"
+            : cluster.Label;
+        if (label.Length == 0) return;
+
+        // Must go through Font(), which sizes in pixels. Constructing a Font
+        // directly sizes in points, and with the supersampling transform applied
+        // that renders the label several times larger than the nodes.
+        using var font = Font(theme, 11f, FontStyle.Bold);
+        using var brush = new SolidBrush(accent);
+        g.DrawString(label, font, brush, (float)cluster.Left + 10f, (float)cluster.Top + 3f);
     }
 
     private static void DrawEdge(Graphics g, Edge edge, DiagramTheme theme)
@@ -85,9 +118,31 @@ public static class PngRenderer
         }
         else
         {
+            // Same rounded-corner geometry as the SVG. AddCurve was smoothing
+            // through every point, which bowed straight runs outwards.
+            var steps = EdgeGeometry.Rounded(edge.Waypoints);
             using var path = new GraphicsPath();
-            path.AddCurve(points, 0.35f);
-            g.DrawPath(pen, path);
+            var current = new PointF((float)steps[0].To.X, (float)steps[0].To.Y);
+            foreach (var step in steps.Skip(1))
+            {
+                var to = new PointF((float)step.To.X, (float)step.To.Y);
+                if (step.Control is { } control)
+                {
+                    // GDI+ has no quadratic; convert to the equivalent cubic.
+                    var c = new PointF((float)control.X, (float)control.Y);
+                    var c1 = new PointF(current.X + 2f / 3f * (c.X - current.X),
+                                        current.Y + 2f / 3f * (c.Y - current.Y));
+                    var c2 = new PointF(to.X + 2f / 3f * (c.X - to.X),
+                                        to.Y + 2f / 3f * (c.Y - to.Y));
+                    path.AddBezier(current, c1, c2, to);
+                }
+                else if (Math.Abs(to.X - current.X) > 0.01f || Math.Abs(to.Y - current.Y) > 0.01f)
+                {
+                    path.AddLine(current, to);
+                }
+                current = to;
+            }
+            if (path.PointCount > 0) g.DrawPath(pen, path);
         }
 
         if (edge.ToEnding == EdgeEnding.Arrow)

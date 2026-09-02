@@ -66,7 +66,10 @@ dialogue has shown you the exact payload.
 **Outputs**
 
 - **ERD** and a chart per cloud flow, drawn by the built-in layout engine, which has no
-  dependencies and never has to be installed. Mermaid is available with `--mermaid`, but it is
+  dependencies and never has to be installed. A flow chart has the shape of the flow: every
+  scope, loop and condition is drawn as a labelled box around its contents, branches run side by
+  side with their names on the edges rather than stacked into one chain, and lines turn square
+  corners through the gaps between rows instead of cutting across the boxes. Mermaid is available with `--mermaid`, but it is
   not the default: past its size limits it renders a picture of an error message and returns it
   as a valid diagram, and it produces very tall strips for long flows. Above 25 tables the ERD
   drops to table names, because every column at that size is unreadable.

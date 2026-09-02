@@ -39,6 +39,11 @@ public static class SvgRenderer
 
         svg.AppendLine($"  <rect width=\"{width}\" height=\"{height}\" fill=\"{theme.Canvas}\"/>");
 
+        // Clusters first and outermost first, so a nested scope is drawn on top
+        // of the one containing it rather than hidden beneath it.
+        foreach (var cluster in graph.Clusters.Where(c => c.HasBounds).OrderBy(graph.DepthOf))
+            RenderCluster(svg, cluster, graph.DepthOf(cluster), theme);
+
         // Edges, then nodes, then edge labels: labels drawn before the nodes
         // would be hidden underneath them.
         foreach (var edge in graph.Edges) RenderEdge(svg, edge, theme);
@@ -49,27 +54,45 @@ public static class SvgRenderer
         return svg.ToString();
     }
 
+    /// <summary>
+    /// The box around a scope, loop or branch. Drawn as a dashed outline with a
+    /// faint tint so it reads as a grouping rather than another step, and
+    /// alternating tints by depth so nesting is visible.
+    /// </summary>
+    private static void RenderCluster(StringBuilder svg, Cluster cluster, int depth, DiagramTheme theme)
+    {
+        var accent = cluster.AccentColour ?? theme.Primary;
+        var fill = depth % 2 == 0 ? theme.ClusterFill : theme.Canvas;
+
+        svg.AppendLine($"  <rect x=\"{N(cluster.Left)}\" y=\"{N(cluster.Top)}\" " +
+                       $"width=\"{N(cluster.Width)}\" height=\"{N(cluster.Height)}\" rx=\"10\" " +
+                       $"fill=\"{fill}\" stroke=\"{accent}\" stroke-width=\"1.2\" " +
+                       $"stroke-dasharray=\"6 4\" opacity=\"0.95\"/>");
+
+        var label = cluster.Subtitle is { Length: > 0 } && !string.Equals(cluster.Subtitle, cluster.Label,
+                        StringComparison.OrdinalIgnoreCase)
+            ? $"{cluster.Label}  ·  {cluster.Subtitle}"
+            : cluster.Label;
+        if (label.Length == 0) return;
+
+        svg.AppendLine($"  <text x=\"{N(cluster.Left + 12)}\" y=\"{N(cluster.Top + 15)}\" " +
+                       $"font-size=\"11\" font-weight=\"600\" fill=\"{accent}\">{Escape(label)}</text>");
+    }
+
     private static void RenderEdge(StringBuilder svg, Edge edge, DiagramTheme theme)
     {
         if (edge.Waypoints.Count < 2) return;
 
+        var steps = EdgeGeometry.Rounded(edge.Waypoints);
+        if (steps.Count < 2) return;
+
         var path = new StringBuilder();
-        path.Append($"M {N(edge.Waypoints[0].X)} {N(edge.Waypoints[0].Y)}");
-        for (var i = 1; i < edge.Waypoints.Count; i++)
+        path.Append($"M {N(steps[0].To.X)} {N(steps[0].To.Y)}");
+        foreach (var step in steps.Skip(1))
         {
-            var point = edge.Waypoints[i];
-            if (i < edge.Waypoints.Count - 1)
-            {
-                // Curve through the dummy node rather than turning a hard corner.
-                var next = edge.Waypoints[i + 1];
-                var midX = (point.X + next.X) / 2;
-                var midY = (point.Y + next.Y) / 2;
-                path.Append($" Q {N(point.X)} {N(point.Y)} {N(midX)} {N(midY)}");
-            }
-            else
-            {
-                path.Append($" L {N(point.X)} {N(point.Y)}");
-            }
+            path.Append(step.Control is { } control
+                ? $" Q {N(control.X)} {N(control.Y)} {N(step.To.X)} {N(step.To.Y)}"
+                : $" L {N(step.To.X)} {N(step.To.Y)}");
         }
 
         var dash = edge.Dashed ? " stroke-dasharray=\"6 4\"" : string.Empty;

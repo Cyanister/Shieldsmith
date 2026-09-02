@@ -147,6 +147,36 @@ public static class FlowParser
         return trigger;
     }
 
+    /// <summary>Adds a branch, but only when it actually contains something.</summary>
+    private static void AddBranch(FlowAction action, string label, JsonElement actionsElement)
+    {
+        var parsed = ParseActions(actionsElement);
+        if (parsed.Count == 0) return;
+        var branch = new FlowBranch(label);
+        branch.Actions.AddRange(parsed);
+        action.Branches.Add(branch);
+    }
+
+    /// <summary>
+    /// A switch case's label. The designer shows the case value, which sits in
+    /// "case"; the property name is a generated key such as "Case" or "Case_2"
+    /// and is only worth showing when there is no value to show instead.
+    /// </summary>
+    private static string CaseLabel(JsonProperty caseProperty)
+    {
+        if (caseProperty.Value.TryGetProperty("case", out var value))
+        {
+            var text = value.ValueKind switch
+            {
+                JsonValueKind.String => value.GetString(),
+                JsonValueKind.Number or JsonValueKind.True or JsonValueKind.False => value.ToString(),
+                _ => null,
+            };
+            if (!string.IsNullOrWhiteSpace(text)) return text!;
+        }
+        return caseProperty.Name.Replace('_', ' ');
+    }
+
     private static List<FlowAction> ParseActions(JsonElement actionsElement)
     {
         var actions = new List<FlowAction>();
@@ -172,21 +202,30 @@ public static class FlowParser
 
             // Nested actions: Scope/Foreach/Until carry "actions"; If adds "else";
             // Switch carries "cases" (each with "actions") and "default".
+            //
+            // Each group becomes its own branch rather than being flattened into
+            // one list. The branch is what a diagram needs to draw the Yes and No
+            // paths beside each other, and what tells a scope where its box ends.
+            var isCondition = action.Type.Equals("If", StringComparison.OrdinalIgnoreCase);
+
             if (element.TryGetProperty("actions", out var nested))
-                action.Children.AddRange(ParseActions(nested));
+                AddBranch(action, isCondition ? "Yes" : string.Empty, nested);
+
             if (element.TryGetProperty("else", out var elseBranch)
                 && elseBranch.TryGetProperty("actions", out var elseActions))
-                action.Children.AddRange(ParseActions(elseActions));
+                AddBranch(action, "No", elseActions);
+
             if (element.TryGetProperty("cases", out var cases)
                 && cases.ValueKind == JsonValueKind.Object)
             {
                 foreach (var caseProperty in cases.EnumerateObject())
                     if (caseProperty.Value.TryGetProperty("actions", out var caseActions))
-                        action.Children.AddRange(ParseActions(caseActions));
+                        AddBranch(action, CaseLabel(caseProperty), caseActions);
             }
+
             if (element.TryGetProperty("default", out var defaultCase)
                 && defaultCase.TryGetProperty("actions", out var defaultActions))
-                action.Children.AddRange(ParseActions(defaultActions));
+                AddBranch(action, "Default", defaultActions);
 
             actions.Add(action);
         }

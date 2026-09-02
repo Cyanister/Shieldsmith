@@ -201,13 +201,48 @@ public sealed class FlowAction
     public string Connector { get; set; } = string.Empty;
     /// <summary>Names of actions this one runs after, from runAfter.</summary>
     public List<string> RunAfter { get; } = new();
-    public List<FlowAction> Children { get; } = new();
+
+    /// <summary>
+    /// Nested actions, grouped by the branch they belong to. A Scope, Foreach
+    /// or Until has one unlabelled branch; an If has "Yes" and "No"; a Switch
+    /// has one per case plus "Default". Keeping them separate is what lets a
+    /// diagram draw two paths side by side instead of one chain.
+    /// </summary>
+    public List<FlowBranch> Branches { get; } = new();
+
+    /// <summary>
+    /// Every nested action, flattened. Reading view for consumers that do not
+    /// care which branch an action sits in; the branches are the storage.
+    /// </summary>
+    public IReadOnlyList<FlowAction> Children =>
+        Branches.SelectMany(b => b.Actions).ToList();
+
+    /// <summary>True for the action types that contain other actions.</summary>
+    public bool IsContainer => Branches.Count > 0 || Type switch
+    {
+        "Scope" or "If" or "Switch" or "Foreach" or "Until" => true,
+        _ => false,
+    };
 
     public string DisplayName => Name.Replace('_', ' ');
     public string OperationDisplay =>
         string.IsNullOrEmpty(OperationId)
             ? Type
             : $"{OperationId}{(string.IsNullOrEmpty(Connector) ? string.Empty : $" ({Connector})")}";
+}
+
+/// <summary>
+/// One branch of a container action: the "Yes" side of a condition, a single
+/// switch case, or the unlabelled body of a scope.
+/// </summary>
+public sealed class FlowBranch
+{
+    /// <summary>"Yes", "No", a case value, "Default", or empty for a plain body.</summary>
+    public string Label { get; set; } = string.Empty;
+    public List<FlowAction> Actions { get; } = new();
+
+    public FlowBranch() { }
+    public FlowBranch(string label) => Label = label;
 }
 
 public sealed class FlowConnectionReference

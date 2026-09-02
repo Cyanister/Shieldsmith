@@ -132,6 +132,23 @@ assemblies, types and SDK message processing steps from `customizations.xml`. Po
 documents neither. Both were written against real exports: a 16-stage flow, and an assembly with
 three types and four registrations.
 
+**Diagrams shaped like the thing they document.** A flow chart now has the structure of the
+flow. Scopes, loops and conditions are drawn as labelled boxes around their contents, nested
+where the flow nests, so a Catch scope encloses its steps instead of being a run of boxes
+indistinguishable from the rest. Branches run side by side with their names on the edges.
+
+That needed three fixes, only one of which was in the layout. The parser was flattening
+`actions`, `else`, `cases` and `default` into one list, losing which path an action was on. The
+graph builder was chaining every sibling in document order and ignoring `runAfter`, which is
+what decides whether two actions are parallel. Only then could the layout keep a cluster's
+members together and draw its box.
+
+Lines are cleaner too. Edges route orthogonally through the empty band between rows, which is
+the only region guaranteed to contain no boxes; dummy nodes reserve a real corridor rather than
+a single pixel, so a long edge has somewhere to go; long single-file runs are pulled into a
+straight column instead of drifting into a diagonal; and corner rounding is capped, because
+rounding to each segment's midpoint made two edges leaving one node bow out into a lens.
+
 ## What is verified, and how
 
 - **65 unit tests** across Core, Outputs, Ai and Diagrams, all against the synthetic fixture.
