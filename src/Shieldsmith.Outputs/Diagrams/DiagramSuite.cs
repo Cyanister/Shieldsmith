@@ -36,20 +36,21 @@ public static class DiagramSuite
         public bool ShowColumns { get; set; } = true;
 
         /// <summary>
-        /// Drops columns from the diagram when the solution is too large for
-        /// them to be readable. Set false to be taken literally.
+        /// Drops columns from a very large entity diagram. Off by default:
+        /// asking for columns and silently not getting them is worse than a
+        /// large diagram, and "show columns" is an explicit instruction.
         /// </summary>
-        public bool SimplifyLargeDiagrams { get; set; } = true;
+        public bool SimplifyLargeDiagrams { get; set; }
         public bool IncludeFlowDiagrams { get; set; } = true;
         /// <summary>Cap on rendered flow charts; the rest still get Mermaid source.</summary>
         public int MaxFlowDiagrams { get; set; } = 60;
         /// <summary>
-        /// The built-in engine by default. Mermaid is opt-in because it fails
-        /// on real solutions rather than on the fixture: past its size limits
-        /// it draws a picture of an error message and returns it as a valid
-        /// diagram, and it produces 12000 pixel tall strips for long flows.
+        /// Mermaid first, falling back to the built-in engine. Mermaid gives up
+        /// quietly past its size limits, which is why its output is checked for
+        /// an error diagram rather than trusted; when that happens the built-in
+        /// engine draws it instead and a note says so.
         /// </summary>
-        public DiagramEngine PreferredEngine { get; set; } = DiagramEngine.Internal;
+        public DiagramEngine PreferredEngine { get; set; } = DiagramEngine.Mermaid;
         public DiagramTheme Theme { get; set; } = DiagramTheme.Brand;
     }
 
@@ -62,6 +63,16 @@ public static class DiagramSuite
         var set = new DiagramSet();
 
         // --- Entity relationship diagram -----------------------------------
+        // No tables means no data model. An agent, flow or web resource solution
+        // is a normal thing to document; drawing an empty diagram for it just
+        // produces a blank box that looks like a failure.
+        if (model.Entities.Count == 0)
+        {
+            set.Notes.Add("This solution contains no tables, so there is no entity relationship " +
+                          "diagram to draw.");
+            if (!options.IncludeFlowDiagrams) return set;
+        }
+
         progress?.Report("Building the entity relationship diagram...");
 
         var showColumns = options.ShowColumns;
@@ -74,10 +85,14 @@ public static class DiagramSuite
                           "Each table's columns are listed in full in its own section.");
         }
 
-        set.ErdMermaidSource = MermaidGenerator.BuildErd(model, showColumns);
+        set.ErdMermaidSource = model.Entities.Count == 0
+            ? string.Empty
+            : MermaidGenerator.BuildErd(model, showColumns);
 
-        var erdImage = TryMermaid(mermaidRenderer, set.ErdMermaidSource, outputDirectory, "erd",
-            options, set, "entity relationship diagram");
+        var erdImage = set.ErdMermaidSource.Length == 0
+            ? null
+            : TryMermaid(mermaidRenderer, set.ErdMermaidSource, outputDirectory, "erd",
+                options, set, "entity relationship diagram");
         if (erdImage is null)
         {
             var graph = SolutionGraphBuilder.BuildErd(model, showColumns);

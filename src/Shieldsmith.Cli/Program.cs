@@ -19,7 +19,7 @@ if (args.Length == 0)
     Console.WriteLine("                                         Write a docpack folder for use in Claude Code");
     Console.WriteLine("  shieldsmith analyze <solution.zip>          Print a summary of the solution");
     Console.WriteLine("  shieldsmith json <solution.zip> [out.json]  Write the canonical JSON extraction");
-    Console.WriteLine("  shieldsmith diagram <solution.zip> [outdir] [--mermaid] [--no-flows]");
+    Console.WriteLine("  shieldsmith diagram <solution.zip> [outdir] [--no-mermaid] [--no-flows]");
     Console.WriteLine("                                         Render the ERD and a chart per cloud flow");
     Console.WriteLine("  shieldsmith erd <solution.zip> [outdir]     Render the entity relationship diagram");
     Console.WriteLine("  shieldsmith vsdx <solution.zip> [out.vsdx]  Write a Visio diagram of the data model");
@@ -273,7 +273,7 @@ try
 
             // The full diagram suite: Shieldsmith's own engine by default, plus a
             // chart per cloud flow. Mermaid is opt-in via --mermaid.
-            var useMermaid = flags.Contains("--mermaid");
+            var useMermaid = !flags.Contains("--no-mermaid");
             var diagramBridge = Shieldsmith.Cli.MermaidBridge.Create(useMermaid, out var diagramMermaidStatus);
             Console.Error.WriteLine(diagramMermaidStatus);
             var diagramSet = DiagramSuite.Build(model, Path.Combine(outputDir, "diagrams"),
@@ -322,7 +322,7 @@ try
                 : Path.Combine(Path.GetDirectoryName(Path.GetFullPath(zipPath))!,
                     model.UniqueName + "_diagrams");
 
-            var diagramUseMermaid = diagramFlags.Contains("--mermaid");
+            var diagramUseMermaid = !diagramFlags.Contains("--no-mermaid");
             var bridge = Shieldsmith.Cli.MermaidBridge.Create(diagramUseMermaid, out var mermaidStatus);
             Console.Error.WriteLine(mermaidStatus);
 

@@ -1,6 +1,7 @@
-using Shieldsmith.Core.Models;
+﻿using Shieldsmith.Core.Models;
 using Shieldsmith.Diagrams;
 using Shieldsmith.Diagrams.Rendering;
+using Shieldsmith.Outputs.Diagrams;
 using Shieldsmith.Outputs.Graphing;
 using Xunit;
 
@@ -176,6 +177,52 @@ public sealed class FlowShapeTests
             Assert.True(node.Top >= cluster.Top, $"{node.Title} escapes the top edge");
             Assert.True(node.Bottom <= cluster.Bottom, $"{node.Title} escapes the bottom edge");
         }
+    }
+
+    [Fact]
+    public void A_solution_with_no_tables_produces_no_diagram_rather_than_failing()
+    {
+        // A Copilot Studio agent solution has no data model. This used to throw
+        // from the renderer, which aborted the whole analysis and reported a
+        // perfectly good agent solution as an empty zip.
+        var model = new SolutionModel { UniqueName = "AgentOnly", DisplayName = "Agent only" };
+        model.Agents.Add(new AgentModel { Name = "Assistant", SchemaName = "x_assistant" });
+
+        var directory = Path.Combine(Path.GetTempPath(), $"shieldsmith-empty-{Guid.NewGuid():N}");
+        try
+        {
+            var set = DiagramSuite.Build(model, directory);
+            Assert.Null(set.Erd);
+            Assert.Empty(set.ErdMermaidSource);
+            Assert.Contains(set.Notes, n => n.Contains("no tables", StringComparison.OrdinalIgnoreCase));
+
+            // The Graphviz path must survive it too; the Visio writer needs a
+            // layout and asks for one regardless of what is in the solution.
+            var erd = ErdGenerator.Generate(model, directory, "erd");
+            Assert.Null(erd.PngPath);
+            Assert.NotNull(erd.Warning);
+        }
+        finally
+        {
+            if (Directory.Exists(directory)) Directory.Delete(directory, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void Columns_are_kept_however_many_tables_there_are()
+    {
+        // "Show columns" is an explicit instruction. Silently dropping them on a
+        // large solution meant asking for columns and not getting them.
+        var model = new SolutionModel { UniqueName = "Wide", DisplayName = "Wide" };
+        for (var i = 0; i < 40; i++)
+        {
+            var entity = new EntityModel { SchemaName = $"t_{i}", LogicalName = $"t_{i}" };
+            entity.Attributes.Add(new AttributeModel { LogicalName = $"c_{i}", Type = "nvarchar" });
+            model.Entities.Add(entity);
+        }
+
+        var graph = SolutionGraphBuilder.BuildErd(model, showColumns: true);
+        Assert.All(graph.Nodes, n => Assert.NotEmpty(n.Lines));
     }
 
     [Fact]

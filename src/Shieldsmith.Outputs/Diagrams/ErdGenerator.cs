@@ -24,6 +24,16 @@ public static class ErdGenerator
             DotPath = Path.Combine(outputDirectory, baseName + ".dot"),
         };
 
+        // A solution with no tables is perfectly normal: a Copilot Studio agent,
+        // a flow-only solution, a web resource pack. There is simply no data
+        // model to draw. Returning an empty result says so; throwing here used
+        // to abort the whole analysis and report an agent solution as empty.
+        if (model.Entities.Count == 0)
+        {
+            result.Warning = "This solution contains no tables, so there is no data model to draw.";
+            return result;
+        }
+
         var dot = DotBuilder.Build(model, showAttributes);
         File.WriteAllText(result.DotPath, dot);
 

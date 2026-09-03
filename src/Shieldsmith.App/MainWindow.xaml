@@ -131,13 +131,13 @@
                     <Border Style="{StaticResource Card}" Margin="0,14,0,0">
                         <StackPanel>
                             <TextBlock Text="Diagrams" Style="{StaticResource CardTitle}"/>
-                            <TextBlock Text="The built-in engine has no dependencies and copes with large solutions. Mermaid is available where WebView2 is present, but gives up quietly on big diagrams."
+                            <TextBlock Text="Mermaid renders where WebView2 is present. It gives up quietly on very large diagrams, so Shieldsmith checks its output and falls back to the built-in engine, which has no dependencies and copes with any size."
                                        Style="{StaticResource CardSubtitle}"/>
 
                             <TextBlock Text="Engine" Style="{StaticResource FieldLabel}"/>
                             <ComboBox x:Name="cmbEngine" Style="{StaticResource Picker}">
-                                <ComboBoxItem Content="Built-in engine" IsSelected="True"/>
-                                <ComboBoxItem Content="Mermaid, falling back to built-in"/>
+                                <ComboBoxItem Content="Mermaid, falling back to built-in" IsSelected="True"/>
+                                <ComboBoxItem Content="Built-in engine only"/>
                             </ComboBox>
 
                             <CheckBox x:Name="chkShowAttributes" Style="{StaticResource Check}"
@@ -426,6 +426,12 @@
                                     <Border Grid.Row="1" Background="{StaticResource Canvas}"
                                             BorderBrush="{StaticResource Border}" BorderThickness="1"
                                             CornerRadius="8" ClipToBounds="True">
+                                        <Grid>
+                                        <TextBlock x:Name="txtNoDiagram" Style="{StaticResource Hint}"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                   TextAlignment="Center" MaxWidth="380"
+                                                   Visibility="Collapsed"
+                                                   Text="Nothing to draw. This solution has no tables and no cloud flows, so there is no diagram to show. The Notes tab says the same."/>
                                         <ScrollViewer x:Name="diagramScroller"
                                                       HorizontalScrollBarVisibility="Auto"
                                                       VerticalScrollBarVisibility="Auto" Padding="14">
@@ -437,6 +443,7 @@
                                                 </Image.LayoutTransform>
                                             </Image>
                                         </ScrollViewer>
+                                        </Grid>
                                     </Border>
                                 </Grid>
                             </TabItem>

@@ -331,7 +331,7 @@ public partial class MainWindow : Window
         SetBusy(true);
         var showAttributes = chkShowAttributes.IsChecked == true;
         var flowDiagrams = chkFlowDiagrams.IsChecked == true;
-        var useMermaid = cmbEngine.SelectedIndex == 1;
+        var useMermaid = cmbEngine.SelectedIndex == 0;
         var progress = new Progress<string>(message => txtStatus.Text = message);
 
         try
@@ -584,6 +584,11 @@ public partial class MainWindow : Window
         var any = choices.Count > 0;
         btnCopyMermaid.IsEnabled = any;
         btnOpenDiagrams.IsEnabled = any;
+        cmbDiagram.Visibility = any ? Visibility.Visible : Visibility.Collapsed;
+        // A solution with no tables and no flows has nothing to draw. Saying so
+        // is better than an empty pane that reads as a failure.
+        txtNoDiagram.Visibility = any ? Visibility.Collapsed : Visibility.Visible;
+        if (!any) imgDiagram.Source = null;
     }
 
     private void cmbDiagram_SelectionChanged(object sender, SelectionChangedEventArgs e)
