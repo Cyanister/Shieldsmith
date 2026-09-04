@@ -25,6 +25,25 @@ public partial class MainWindow : Window
     private string? _diagramDirectory;
     private readonly SecureKeyStore _keyStore = new();
 
+    // Background work started by the last analysis. Output handlers await
+    // these rather than requiring the user to.
+    private Task<DiagramSet>? _diagramTask;
+    private Task<ErdResult>? _erdTask;
+    private int _analysisGeneration;
+
+    private static void SetTaskPercent(ProgressBar bar, TextBlock label, double fraction)
+    {
+        var value = Math.Clamp(fraction, 0, 1) * 100;
+        bar.Value = value;
+        label.Text = $"{value:0}%";
+    }
+
+    /// <summary>Rebuilds the Notes tab; called again as background tasks add notes.</summary>
+    private void RefreshNotes()
+    {
+        if (_solution is not null) dgDiagnostics.ItemsSource = BuildNoteRows();
+    }
+
     public MainWindow()
     {
         InitializeComponent();
@@ -89,6 +108,26 @@ public partial class MainWindow : Window
         await Dispatcher.InvokeAsync(() => { }, System.Windows.Threading.DispatcherPriority.ContextIdle);
         CaptureWindowTo(about, Path.Combine(directory, $"{stem}-about.png"));
         about.Close();
+
+        // The agent drill-down, with its first topic expanded so the
+        // configuration detail is visible in the capture.
+        if (_solution?.Agents.Count > 0)
+        {
+            try
+            {
+                var detail = new AgentDetailWindow(_solution.Agents[0]) { Owner = this };
+                detail.Show();
+                await Dispatcher.InvokeAsync(() => { }, System.Windows.Threading.DispatcherPriority.ContextIdle);
+                if (detail.FirstTopicExpander is { } expander) expander.IsExpanded = true;
+                await Dispatcher.InvokeAsync(() => { }, System.Windows.Threading.DispatcherPriority.ContextIdle);
+                CaptureWindowTo(detail, Path.Combine(directory, $"{stem}-agent-detail.png"));
+                detail.Close();
+            }
+            catch (Exception ex)
+            {
+                File.WriteAllText(Path.Combine(directory, $"{stem}-agent-detail-ERROR.txt"), ex.ToString());
+            }
+        }
 
         // The consent dialogue is the surface that decides whether anything
         // leaves the machine, so it is checked by eye like everything else.
@@ -336,6 +375,9 @@ public partial class MainWindow : Window
         var flowDiagrams = chkFlowDiagrams.IsChecked == true;
         var useMermaid = cmbEngine.SelectedIndex == 0;
         var progress = new Progress<string>(message => txtStatus.Text = message);
+        // Guards against a re-analyse racing the previous run's background
+        // tasks: a stale task's completion must not touch the UI.
+        var generation = ++_analysisGeneration;
 
         try
         {
@@ -346,14 +388,52 @@ public partial class MainWindow : Window
             var workDirectory = _workDirectory;
             var diagramDirectory = _diagramDirectory;
 
-            (_solution, _erd, _diagrams) = await Task.Run(() =>
+            // ---- Phase 1: parse, and show everything readable immediately.
+            _erd = null;
+            _diagrams = null;
+            _solution = await Task.Run(() =>
             {
                 using var unpacked = SolutionUnpacker.Unpack(zipPath);
-                var model = SolutionParser.Parse(unpacked, progress);
+                return SolutionParser.Parse(unpacked, progress);
+            });
 
-                var bridge = MermaidBridge.Create(useMermaid, out var mermaidStatus);
-                ((IProgress<string>)progress).Report(mermaidStatus);
+            PopulateResults();
 
+            var relationships = _solution.OneToManyRelationships.Count + _solution.ManyToManyRelationships.Count;
+            txtStatus.Text = $"Analysed {_solution.DisplayName}: {_solution.Entities.Count} tables, " +
+                             $"{relationships} relationships, {_solution.Processes.Count} automations. " +
+                             "Diagrams are drawing in the background.";
+
+            btnGenerateWord.IsEnabled = true;
+            btnGenerateMarkdown.IsEnabled = true;
+            btnExportPack.IsEnabled = true;
+            // DOT needs only the model; Visio also needs the layout, so it
+            // enables when that task finishes. A solution with no tables has no
+            // data model to draw, so neither applies.
+            var hasDataModel = _solution.Entities.Count > 0;
+            btnExportDot.IsEnabled = hasDataModel;
+            btnGenerateVisio.IsEnabled = false;
+
+            // ---- Phase 2: diagrams and the Visio layout, in parallel, each
+            // with its own completion bar. The user reads the tabs meanwhile.
+            pnlBackgroundWork.Visibility = Visibility.Visible;
+            SetTaskPercent(barDiagrams, txtDiagramPercent, 0);
+            SetTaskPercent(barVisio, txtVisioPercent, 0);
+            SetBusy(false);
+
+            var model = _solution;
+            var diagramPercent = new Progress<double>(v =>
+            {
+                if (generation == _analysisGeneration) SetTaskPercent(barDiagrams, txtDiagramPercent, v);
+            });
+            var visioPercent = new Progress<double>(v =>
+            {
+                if (generation == _analysisGeneration) SetTaskPercent(barVisio, txtVisioPercent, v);
+            });
+
+            _diagramTask = Task.Run(() =>
+            {
+                var bridge = MermaidBridge.Create(useMermaid, out _);
                 var set = DiagramSuite.Build(model, diagramDirectory,
                     new DiagramSuite.Options
                     {
@@ -361,32 +441,46 @@ public partial class MainWindow : Window
                         IncludeFlowDiagrams = flowDiagrams,
                         PreferredEngine = useMermaid ? DiagramEngine.Mermaid : DiagramEngine.Internal,
                     },
-                    bridge, progress);
+                    bridge, percent: diagramPercent);
                 set.LastMermaidMessage ??= MermaidBridge.LastMessage;
-
-                // The Graphviz layout is still produced: the Visio writer needs
-                // real coordinates, which only ErdGenerator computes.
-                ((IProgress<string>)progress).Report("Laying out the data model for Visio...");
-                var erd = ErdGenerator.Generate(model, workDirectory, model.UniqueName + "_erd", showAttributes);
-                return (model, erd, set);
+                return set;
             });
 
-            PopulateResults();
+            _erdTask = Task.Run(() => ErdGenerator.Generate(model, workDirectory,
+                model.UniqueName + "_erd", showAttributes, percent: visioPercent));
 
-            var relationships = _solution.OneToManyRelationships.Count + _solution.ManyToManyRelationships.Count;
-            txtStatus.Text = $"Analysed {_solution.DisplayName}: {_solution.Entities.Count} tables, " +
-                             $"{relationships} relationships, {_solution.Processes.Count} automations, " +
-                             $"{_diagrams.FlowDiagrams.Count + (_diagrams.Erd is null ? 0 : 1)} diagrams drawn.";
+            // Under --shot, capture the window while the background bars are
+            // live, so the in-flight state is verified by looking at it.
+            if (App.ScreenshotPath is not null)
+            {
+                await Task.Delay(600);
+                await Dispatcher.InvokeAsync(() => { }, System.Windows.Threading.DispatcherPriority.ContextIdle);
+                var stem = Path.GetFileNameWithoutExtension(App.ScreenshotPath);
+                var dir = Path.GetDirectoryName(Path.GetFullPath(App.ScreenshotPath))!;
+                CaptureTo(Path.Combine(dir, $"{stem}-inflight.png"));
+            }
 
-            btnGenerateWord.IsEnabled = true;
-            btnGenerateMarkdown.IsEnabled = true;
-            btnExportPack.IsEnabled = true;
-            // Visio and DOT are drawings of the data model, so a solution with
-            // no tables has nothing for them to contain. The document outputs
-            // stay available: an agent or flow solution still documents fully.
-            var hasDataModel = _solution.Entities.Count > 0;
-            btnGenerateVisio.IsEnabled = hasDataModel;
-            btnExportDot.IsEnabled = hasDataModel;
+            // Await both without blocking the window; apply results only if no
+            // newer analysis has started underneath us.
+            var set = await _diagramTask;
+            if (generation == _analysisGeneration)
+            {
+                _diagrams = set;
+                PopulateDiagramPicker();
+                RefreshNotes();
+            }
+
+            var erd = await _erdTask;
+            if (generation == _analysisGeneration)
+            {
+                _erd = erd;
+                btnGenerateVisio.IsEnabled = hasDataModel;
+                RefreshNotes();
+                pnlBackgroundWork.Visibility = Visibility.Collapsed;
+                txtStatus.Text = $"Analysed {model.DisplayName}: {model.Entities.Count} tables, " +
+                                 $"{relationships} relationships, {model.Processes.Count} automations, " +
+                                 $"{set.FlowDiagrams.Count + (set.Erd is null ? 0 : 1)} diagrams drawn.";
+            }
         }
         catch (SolutionFormatException ex)
         {
@@ -452,7 +546,8 @@ public partial class MainWindow : Window
     // grid carries one summary column rather than columns that only apply to
     // half the rows.
     public sealed record AppRow(string Name, string Kind, string Detail);
-    public sealed record AgentRow(string Name, string Topics, string Tools, string Knowledge, string Auth);
+    public sealed record AgentRow(string Name, string Topics, string Tools, string Knowledge,
+        string Auth, AgentModel Agent);
     public sealed record NoteRow(string Severity, string Message);
 
     private List<RelationshipRow> BuildRelationshipRows()
@@ -537,7 +632,14 @@ public partial class MainWindow : Window
             a.Topics.Count.ToString(),
             a.Tools.Count.ToString(),
             a.KnowledgeSources.Count.ToString(),
-            a.AuthenticationModeDisplay)).ToList();
+            a.AuthenticationModeDisplay,
+            a)).ToList();
+
+    private void dgAgents_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        if (dgAgents.SelectedItem is AgentRow row)
+            new AgentDetailWindow(row.Agent) { Owner = this }.Show();
+    }
 
     private List<NoteRow> BuildNoteRows()
     {
@@ -685,6 +787,26 @@ public partial class MainWindow : Window
 
     // ---- Outputs ----------------------------------------------------------
 
+    /// <summary>
+    /// Waits for the background diagram and layout tasks so a document written
+    /// moments after analysis still embeds every diagram, rather than silently
+    /// shipping without them. Usually a no-op; both tasks are already done.
+    /// </summary>
+    private async Task WaitForBackgroundWorkAsync()
+    {
+        if (_diagramTask is not null && !_diagramTask.IsCompleted)
+        {
+            txtStatus.Text = "Waiting for the diagrams to finish drawing...";
+            _diagrams = await _diagramTask;
+            PopulateDiagramPicker();
+        }
+        if (_erdTask is not null && !_erdTask.IsCompleted)
+        {
+            txtStatus.Text = "Waiting for the Visio layout...";
+            _erd = await _erdTask;
+        }
+    }
+
     private async void btnGenerateWord_Click(object sender, RoutedEventArgs e)
     {
         if (_solution is null) return;
@@ -699,6 +821,7 @@ public partial class MainWindow : Window
 
         await RunOutput(btnGenerateWord, "Word document", async () =>
         {
+            await WaitForBackgroundWorkAsync();
             var interpretation = await RunEnrichmentAsync();
             var solution = _solution;
             var erdPng = _erd?.PngPath;
@@ -717,6 +840,7 @@ public partial class MainWindow : Window
 
         await RunOutput(btnGenerateMarkdown, "Markdown set", async () =>
         {
+            await WaitForBackgroundWorkAsync();
             var interpretation = await RunEnrichmentAsync();
             var solution = _solution;
             var erdPng = _erd?.PngPath;
@@ -784,6 +908,7 @@ public partial class MainWindow : Window
 
         await RunOutput(btnExportPack, "Docpack", async () =>
         {
+            await WaitForBackgroundWorkAsync();
             var solution = _solution;
             var erdPng = _diagrams?.Erd?.PngPath ?? _erd?.PngPath;
             var folderName = dialog.FolderName;

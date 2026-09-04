@@ -14,7 +14,8 @@ public static class ErdGenerator
         string outputDirectory,
         string baseName,
         bool showAttributes = true,
-        GraphvizRunner? runner = null)
+        GraphvizRunner? runner = null,
+        IProgress<double>? percent = null)
     {
         Directory.CreateDirectory(outputDirectory);
         runner ??= new GraphvizRunner();
@@ -31,11 +32,15 @@ public static class ErdGenerator
         if (model.Entities.Count == 0)
         {
             result.Warning = "This solution contains no tables, so there is no data model to draw.";
+            percent?.Report(1.0);
             return result;
         }
 
         var dot = DotBuilder.Build(model, showAttributes);
         File.WriteAllText(result.DotPath, dot);
+        // Coarse milestones: dot.exe gives no incremental progress, so the bar
+        // moves per render pass rather than smoothly.
+        percent?.Report(0.15);
 
         if (runner.IsAvailable)
         {
@@ -44,11 +49,14 @@ public static class ErdGenerator
                 var pngPath = Path.Combine(outputDirectory, baseName + ".png");
                 var svgPath = Path.Combine(outputDirectory, baseName + ".svg");
                 runner.Render(result.DotPath, pngPath, "png");
+                percent?.Report(0.5);
                 runner.Render(result.DotPath, svgPath, "svg");
+                percent?.Report(0.75);
                 result.PngPath = pngPath;
                 result.SvgPath = svgPath;
                 result.Layout = DotPlainLayoutReader.Parse(runner.RenderPlain(result.DotPath));
                 result.UsedGraphviz = true;
+                percent?.Report(1.0);
                 return result;
             }
             catch (GraphvizException ex)
@@ -65,10 +73,12 @@ public static class ErdGenerator
         }
 
         result.Layout = FallbackLayoutEngine.Layout(model, showAttributes);
+        percent?.Report(0.6);
         var fallbackPng = Path.Combine(outputDirectory, baseName + ".png");
         FallbackErdRenderer.RenderPng(result.Layout, fallbackPng);
         result.PngPath = fallbackPng;
         result.UsedGraphviz = false;
+        percent?.Report(1.0);
         return result;
     }
 }

@@ -1,0 +1,153 @@
+﻿<Window x:Class="Shieldsmith.App.AgentDetailWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Agent" Height="780" Width="820" MinHeight="480" MinWidth="600"
+        Icon="Assets/shieldsmith.ico"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
+        Background="{StaticResource Canvas}"
+        FontFamily="{StaticResource BodyFont}"
+        UseLayoutRounding="True">
+
+    <Window.Resources>
+        <Style x:Key="SectionTitle" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource DisplayFont}"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{StaticResource Text}"/>
+            <Setter Property="Margin" Value="0,0,0,10"/>
+        </Style>
+        <Style x:Key="BodyText" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12.5"/>
+            <Setter Property="Foreground" Value="{StaticResource Text}"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="LineHeight" Value="19"/>
+        </Style>
+        <Style x:Key="MutedText" TargetType="TextBlock" BasedOn="{StaticResource BodyText}">
+            <Setter Property="Foreground" Value="{StaticResource Muted}"/>
+        </Style>
+        <Style x:Key="TagLabel" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="10.5"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{StaticResource PrimaryDark}"/>
+        </Style>
+
+        <!-- A trigger phrase, drawn as a small pill. -->
+        <DataTemplate x:Key="PhrasePill">
+            <Border Background="{StaticResource TintLight}" BorderBrush="{StaticResource TintStrong}"
+                    BorderThickness="1" CornerRadius="12" Padding="9,3" Margin="0,0,6,6">
+                <TextBlock Text="{Binding}" FontSize="11.5" Foreground="{StaticResource PrimaryDark}"/>
+            </Border>
+        </DataTemplate>
+
+        <!-- One topic, expandable to its configuration. -->
+        <Style x:Key="TopicExpander" TargetType="Expander">
+            <Setter Property="Margin" Value="0,0,0,8"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Expander">
+                        <Border Background="{StaticResource Surface}" BorderBrush="{StaticResource Border}"
+                                BorderThickness="1" CornerRadius="8">
+                            <StackPanel>
+                                <ToggleButton IsChecked="{Binding IsExpanded, Mode=TwoWay,
+                                              RelativeSource={RelativeSource TemplatedParent}}"
+                                              Cursor="Hand" Background="Transparent">
+                                    <ToggleButton.Template>
+                                        <ControlTemplate TargetType="ToggleButton">
+                                            <Border Background="Transparent" Padding="14,10">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <Path x:Name="Chevron" Grid.Column="0"
+                                                          Data="M 0 0 L 4 4 L 0 8"
+                                                          Stroke="{StaticResource Muted}" StrokeThickness="1.6"
+                                                          VerticalAlignment="Center" Margin="2,0,10,0"/>
+                                                    <ContentPresenter Grid.Column="1"/>
+                                                </Grid>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsChecked" Value="True">
+                                                    <Setter TargetName="Chevron" Property="Data" Value="M 0 0 L 4 4 L 8 0"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </ToggleButton.Template>
+                                    <ContentPresenter ContentSource="Header"/>
+                                </ToggleButton>
+                                <Border x:Name="Content" Visibility="Collapsed" Padding="14,0,14,12">
+                                    <ContentPresenter/>
+                                </Border>
+                            </StackPanel>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsExpanded" Value="True">
+                                <Setter TargetName="Content" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Background="{StaticResource Surface}"
+                BorderBrush="{StaticResource Border}" BorderThickness="0,0,0,1" Padding="22,16">
+            <StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock x:Name="txtAgentName" FontFamily="{StaticResource DisplayFont}"
+                               FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource Text}"/>
+                    <Border Style="{StaticResource Pill}" Margin="10,0,0,0" VerticalAlignment="Center">
+                        <TextBlock x:Name="txtAgentAuth" Style="{StaticResource PillText}"/>
+                    </Border>
+                </StackPanel>
+                <TextBlock x:Name="txtAgentMeta" Style="{StaticResource Hint}" Margin="0,3,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="22,16,22,22">
+            <StackPanel>
+
+                <Border x:Name="cardInstructions" Style="{StaticResource Card}" Margin="0,0,0,14">
+                    <StackPanel>
+                        <TextBlock Text="Instructions" Style="{StaticResource SectionTitle}"/>
+                        <TextBlock x:Name="txtInstructions" Style="{StaticResource BodyText}"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource Card}" Margin="0,0,0,14">
+                    <StackPanel>
+                        <TextBlock x:Name="txtTopicsTitle" Text="Topics" Style="{StaticResource SectionTitle}"/>
+                        <TextBlock x:Name="txtNoTopics" Style="{StaticResource MutedText}" Visibility="Collapsed"
+                                   Text="No topics in this solution."/>
+                        <ItemsControl x:Name="listTopics"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource Card}" Margin="0,0,0,14">
+                    <StackPanel>
+                        <TextBlock x:Name="txtToolsTitle" Text="Tools" Style="{StaticResource SectionTitle}"/>
+                        <TextBlock x:Name="txtNoTools" Style="{StaticResource MutedText}" Visibility="Collapsed"
+                                   Text="No tools or actions in this solution."/>
+                        <ItemsControl x:Name="listTools"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource Card}">
+                    <StackPanel>
+                        <TextBlock x:Name="txtKnowledgeTitle" Text="Knowledge sources" Style="{StaticResource SectionTitle}"/>
+                        <TextBlock x:Name="txtNoKnowledge" Style="{StaticResource MutedText}" Visibility="Collapsed"
+                                   Text="No knowledge sources in this solution."/>
+                        <ItemsControl x:Name="listKnowledge"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Window>

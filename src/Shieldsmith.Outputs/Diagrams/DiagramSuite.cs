@@ -56,11 +56,26 @@ public static class DiagramSuite
 
     public static DiagramSet Build(SolutionModel model, string outputDirectory,
         Options? options = null, MermaidRenderer? mermaidRenderer = null,
-        IProgress<string>? progress = null)
+        IProgress<string>? progress = null, IProgress<double>? percent = null)
     {
         options ??= new Options();
         Directory.CreateDirectory(outputDirectory);
         var set = new DiagramSet();
+
+        // Fraction complete, for a determinate progress bar. The denominator is
+        // known up front: one ERD if there are tables, plus one chart per cloud
+        // flow up to the cap.
+        var totalItems = (model.Entities.Count > 0 ? 1 : 0)
+            + (options.IncludeFlowDiagrams
+                ? Math.Min(model.Processes.Count(p => p.CloudFlow is not null), options.MaxFlowDiagrams)
+                : 0);
+        var doneItems = 0;
+        void Step()
+        {
+            doneItems++;
+            if (totalItems > 0) percent?.Report(Math.Min(1.0, (double)doneItems / totalItems));
+        }
+        if (totalItems == 0) percent?.Report(1.0);
 
         // --- Entity relationship diagram -----------------------------------
         // No tables means no data model. An agent, flow or web resource solution
@@ -101,6 +116,7 @@ public static class DiagramSuite
                     "entity relationship diagram");
         }
         set.Erd = erdImage;
+        if (model.Entities.Count > 0) Step();
 
         // --- One flowchart per cloud flow ----------------------------------
         if (!options.IncludeFlowDiagrams) return set;
@@ -135,8 +151,12 @@ public static class DiagramSuite
                 set.FlowDiagrams[process.Name] = image;
                 rendered++;
             }
+            // Counts the attempt, not the success: a failed diagram must still
+            // advance the bar or it stalls short of completion.
+            Step();
         }
 
+        percent?.Report(1.0);
         return set;
     }
 

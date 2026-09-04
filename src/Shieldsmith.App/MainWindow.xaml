@@ -124,6 +124,26 @@
                                     Style="{StaticResource PrimaryButton}"
                                     HorizontalAlignment="Stretch" Margin="0,12,0,0"
                                     Click="btnAnalyze_Click"/>
+
+                            <!-- Background work after the tabs are populated:
+                                 one determinate bar per task, so the user can
+                                 read the solution while these finish. -->
+                            <StackPanel x:Name="pnlBackgroundWork" Visibility="Collapsed" Margin="0,14,0,0">
+                                <Grid Margin="0,0,0,4">
+                                    <TextBlock Text="Diagrams" Style="{StaticResource FieldLabel}" Margin="0"/>
+                                    <TextBlock x:Name="txtDiagramPercent" Style="{StaticResource FieldLabel}"
+                                               Margin="0" HorizontalAlignment="Right" Text="0%"/>
+                                </Grid>
+                                <ProgressBar x:Name="barDiagrams" Style="{StaticResource Progress}"
+                                             Minimum="0" Maximum="100" Height="5"/>
+                                <Grid Margin="0,10,0,4">
+                                    <TextBlock Text="Visio and Graphviz layout" Style="{StaticResource FieldLabel}" Margin="0"/>
+                                    <TextBlock x:Name="txtVisioPercent" Style="{StaticResource FieldLabel}"
+                                               Margin="0" HorizontalAlignment="Right" Text="0%"/>
+                                </Grid>
+                                <ProgressBar x:Name="barVisio" Style="{StaticResource Progress}"
+                                             Minimum="0" Maximum="100" Height="5"/>
+                            </StackPanel>
                         </StackPanel>
                     </Border>
 
@@ -360,7 +380,15 @@
                             </TabItem>
 
                             <TabItem Header="Agents">
-                                <DataGrid x:Name="dgAgents" Style="{StaticResource DataGridStyle}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Grid.Row="0" Style="{StaticResource Hint}" Margin="0,0,0,8"
+                                               Text="Double-click an agent to explore its topics, tools and knowledge sources."/>
+                                    <DataGrid Grid.Row="1" x:Name="dgAgents" Style="{StaticResource DataGridStyle}"
+                                              MouseDoubleClick="dgAgents_MouseDoubleClick">
                                     <DataGrid.Columns>
                                         <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="260"/>
                                         <DataGridTextColumn Header="Topics" Binding="{Binding Topics}" Width="90"/>
@@ -368,7 +396,8 @@
                                         <DataGridTextColumn Header="Knowledge" Binding="{Binding Knowledge}" Width="110"/>
                                         <DataGridTextColumn Header="Authentication" Binding="{Binding Auth}" Width="*"/>
                                     </DataGrid.Columns>
-                                </DataGrid>
+                                    </DataGrid>
+                                </Grid>
                             </TabItem>
 
                             <TabItem Header="Components">
