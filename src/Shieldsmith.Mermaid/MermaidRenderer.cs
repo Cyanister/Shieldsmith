@@ -234,37 +234,70 @@ public sealed class MermaidRenderer
             if (width <= 0 || height <= 0) return;
 
             var scale = Math.Clamp(RasterScale, 1.0, 3.0);
-            // Keep the captured bitmap within sane memory bounds: a runaway flow
-            // chart should degrade in resolution, not exhaust the machine.
+            // Keep the output within what Chromium will actually paint: a
+            // runaway diagram degrades in resolution rather than failing or,
+            // worse, coming out part-blank. The area cap matters more than the
+            // edge cap: a wide ERD fits both edges and still breaks the paint
+            // budget on area alone.
             var maxEdge = 12000.0;
+            var maxPixels = 24_000_000.0;
             if (width * scale > maxEdge) scale = maxEdge / width;
             if (height * scale > maxEdge) scale = Math.Min(scale, maxEdge / height);
-            scale = Math.Max(scale, 0.25);
+            var area = width * height * scale * scale;
+            if (area > maxPixels) scale *= Math.Sqrt(maxPixels / area);
+            scale = Math.Max(scale, 0.05);
 
-            var clip = new
+            var outputWidth = (int)(Math.Ceiling(width * scale) + 16);
+            var outputHeight = (int)(Math.Ceiling(height * scale) + 16);
+
+            // Two hard-won facts drive this shape. captureBeyondViewport
+            // extends the capture downwards but does not paint to the RIGHT of
+            // the viewport, so a wide ERD came out as a painted strip with
+            // blank whiteness beside it. And a viewport override the full size
+            // of a huge diagram exceeds the compositor's paint budget, which
+            // silently leaves the BOTTOM unpainted. So the page is shrunk to
+            // the final output size with CSS zoom, the viewport is overridden
+            // to exactly that size, and the capture is 1:1 over a surface small
+            // enough to paint completely.
+            await webView.CoreWebView2.ExecuteScriptAsync(
+                $"document.body.style.zoom = '{scale.ToString(System.Globalization.CultureInfo.InvariantCulture)}';");
+            await webView.CoreWebView2.CallDevToolsProtocolMethodAsync(
+                "Emulation.setDeviceMetricsOverride", JsonSerializer.Serialize(new
+                {
+                    width = outputWidth,
+                    height = outputHeight,
+                    deviceScaleFactor = 1,
+                    mobile = false,
+                }));
+            try
             {
-                x = 0,
-                y = 0,
-                width = Math.Ceiling(width) + 16,
-                height = Math.Ceiling(height) + 16,
-                scale,
-            };
-            var parameters = JsonSerializer.Serialize(new
+                // A frame for the zoomed layout to settle before rasterising.
+                await Task.Delay(120);
+
+                var clip = new { x = 0, y = 0, width = outputWidth, height = outputHeight, scale = 1 };
+                var parameters = JsonSerializer.Serialize(new
+                {
+                    format = "png",
+                    captureBeyondViewport = true,
+                    fromSurface = true,
+                    clip,
+                });
+
+                var response = await webView.CoreWebView2.CallDevToolsProtocolMethodAsync(
+                    "Page.captureScreenshot", parameters);
+                using var document = JsonDocument.Parse(response);
+                if (!document.RootElement.TryGetProperty("data", out var data)) return;
+
+                var bytes = Convert.FromBase64String(data.GetString() ?? string.Empty);
+                if (bytes.Length == 0) return;
+                await File.WriteAllBytesAsync(pngPath, bytes);
+            }
+            finally
             {
-                format = "png",
-                captureBeyondViewport = true,
-                fromSurface = true,
-                clip,
-            });
-
-            var response = await webView.CoreWebView2.CallDevToolsProtocolMethodAsync(
-                "Page.captureScreenshot", parameters);
-            using var document = JsonDocument.Parse(response);
-            if (!document.RootElement.TryGetProperty("data", out var data)) return;
-
-            var bytes = Convert.FromBase64String(data.GetString() ?? string.Empty);
-            if (bytes.Length == 0) return;
-            await File.WriteAllBytesAsync(pngPath, bytes);
+                await webView.CoreWebView2.CallDevToolsProtocolMethodAsync(
+                    "Emulation.clearDeviceMetricsOverride", "{}");
+                await webView.CoreWebView2.ExecuteScriptAsync("document.body.style.zoom = '';");
+            }
         }
         catch
         {
