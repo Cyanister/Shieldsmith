@@ -49,6 +49,33 @@ Made once, recorded here so they are not relitigated.
 
 ## Version history
 
+### 0.9.1, 2026-09-03
+
+Fixes and additions driven by real use, most reported against real solutions rather than found
+on the fixture.
+
+- Copilot-only solutions load: no tables is a supported state, not a failure. The diagram pane
+  says there is nothing to draw instead of showing a blank box.
+- Mermaid is the default engine again, and its two silent failure modes are handled: error
+  diagrams are detected as failures with fallback to the built-in engine, and wide diagrams are
+  captured completely (CSS zoom to the output size plus a matching viewport override) instead
+  of as a viewport-wide strip.
+- Flow charts have the shape of the flow: scopes, loops and conditions are drawn as labelled
+  boxes around their contents, branches run side by side with names on the edges, order comes
+  from runAfter, and lines route orthogonally through the gaps rather than under boxes.
+- Business process flows (stages and steps from the XAML) and plugins (assemblies, types and
+  SDK message processing steps) are documented; PowerDocu covers neither.
+- Analysis shows the tabs as soon as parsing finishes; diagrams and the Visio layout run as
+  background tasks with a completion bar each, and documents written early wait for them.
+- Agents are explorable: double-click opens topics with trigger phrases, messages and actions,
+  plus tools and knowledge sources as configured.
+- Graphviz DOT export in the app beside Visio, install instructions everywhere Graphviz's
+  absence is mentioned, and the DOT output wears the brand palette.
+- Word output reworked: brand colours, banded rows, cell padding, sections starting on their
+  own pages, an unnumbered cover, and fixed proportional table columns replacing autofit,
+  which had been giving a two-digit column a third of the page.
+- Columns are never silently dropped from the ERD; "show columns" is honoured at any size.
+
 ### 0.9.0, 2026-08-20
 
 Everything below was built on 2026-08-20, in phase order. It is one commit: the history was
