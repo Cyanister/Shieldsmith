@@ -377,8 +377,13 @@ public partial class MainWindow : Window
 
             btnGenerateWord.IsEnabled = true;
             btnGenerateMarkdown.IsEnabled = true;
-            btnGenerateVisio.IsEnabled = true;
             btnExportPack.IsEnabled = true;
+            // Visio and DOT are drawings of the data model, so a solution with
+            // no tables has nothing for them to contain. The document outputs
+            // stay available: an agent or flow solution still documents fully.
+            var hasDataModel = _solution.Entities.Count > 0;
+            btnGenerateVisio.IsEnabled = hasDataModel;
+            btnExportDot.IsEnabled = hasDataModel;
         }
         catch (SolutionFormatException ex)
         {
@@ -716,6 +721,32 @@ public partial class MainWindow : Window
             var target = Path.Combine(dialog.FolderName, solution!.UniqueName + "_markdown");
             return await Task.Run(() => Shieldsmith.Outputs.Markdown.MarkdownReportBuilder.Write(
                 solution, target, erdPng, interpretation, diagrams));
+        });
+    }
+
+    private async void btnExportDot_Click(object sender, RoutedEventArgs e)
+    {
+        if (_solution is null) return;
+
+        var dialog = new SaveFileDialog
+        {
+            Title = "Save Graphviz DOT source",
+            Filter = "Graphviz DOT (*.dot)|*.dot|Graphviz DOT (*.gv)|*.gv",
+            FileName = $"{_solution.UniqueName}_DataModel.dot",
+        };
+        if (dialog.ShowDialog() != true) return;
+
+        await RunOutput(btnExportDot, "Graphviz DOT file", async () =>
+        {
+            var solution = _solution;
+            var showColumns = chkShowAttributes.IsChecked == true;
+            var fileName = dialog.FileName;
+            // Built fresh rather than copied from the work directory, so the
+            // export honours the current column toggle rather than whatever it
+            // was when the solution was analysed.
+            await Task.Run(() => File.WriteAllText(fileName,
+                DotBuilder.Build(solution!, showColumns)));
+            return fileName;
         });
     }
 

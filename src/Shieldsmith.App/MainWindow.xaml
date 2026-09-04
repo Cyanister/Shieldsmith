@@ -208,7 +208,13 @@
                             <Button x:Name="btnGenerateVisio" Content="Visio diagram"
                                     Style="{StaticResource SecondaryButton}"
                                     HorizontalAlignment="Stretch" Margin="0,8,0,0" IsEnabled="False"
-                                    Click="btnGenerateVisio_Click"/>
+                                    Click="btnGenerateVisio_Click"
+                                    ToolTip="A real .vsdx file that opens in Visio, with the entity shapes and relationship connectors laid out"/>
+                            <Button x:Name="btnExportDot" Content="Graphviz DOT"
+                                    Style="{StaticResource SecondaryButton}"
+                                    HorizontalAlignment="Stretch" Margin="0,8,0,0" IsEnabled="False"
+                                    Click="btnExportDot_Click"
+                                    ToolTip="The data model as Graphviz DOT source, for dot, neato, sfdp or any tool that reads .gv files"/>
                             <Button x:Name="btnExportPack" Content="Export for Claude Code"
                                     Style="{StaticResource SecondaryButton}"
                                     HorizontalAlignment="Stretch" Margin="0,8,0,0" IsEnabled="False"

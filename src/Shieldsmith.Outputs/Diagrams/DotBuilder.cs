@@ -17,8 +17,9 @@ public static class DotBuilder
         dot.AppendLine("  rankdir=TB;");
         dot.AppendLine("  splines=ortho;");
         dot.AppendLine("  nodesep=0.6; ranksep=0.8;");
-        dot.AppendLine("  node [shape=record, style=filled, fillcolor=\"#E8F1FB\", color=\"#2B579A\", fontname=\"Segoe UI\", fontsize=10];");
-        dot.AppendLine("  edge [fontname=\"Segoe UI\", fontsize=9, color=\"#444444\"];");
+        // Brand palette, matching DiagramTheme: teal on light teal tint.
+        dot.AppendLine("  node [shape=record, style=filled, fillcolor=\"#F0FAFA\", color=\"#00AAAA\", fontcolor=\"#0F172A\", fontname=\"Segoe UI\", fontsize=10];");
+        dot.AppendLine("  edge [fontname=\"Segoe UI\", fontsize=9, color=\"#64748B\"];");
         dot.AppendLine();
 
         var drawable = model.Entities.Where(e => e.Attributes.Count > 0 || HasAnyRelationship(model, e)).ToList();
