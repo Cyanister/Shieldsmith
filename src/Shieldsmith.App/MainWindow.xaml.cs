@@ -79,10 +79,11 @@ public partial class MainWindow : Window
         foreach (var tab in tabResults.Items.OfType<TabItem>().ToList())
         {
             tabResults.SelectedItem = tab;
-            // Two idle passes: one to lay the tab out, one to let the diagram
-            // fit itself to the viewport it has only just been given.
+            // Two idle passes: one to lay the tab out, one for the pending-fit
+            // handler to react. Deliberately no explicit FitDiagram here: the
+            // capture must prove the same path a user's click takes, which is
+            // exactly what masked the zero-viewport fit bug.
             await Dispatcher.InvokeAsync(() => { }, System.Windows.Threading.DispatcherPriority.ContextIdle);
-            if (ReferenceEquals(tab.Content, null) is false) FitDiagram();
             await Dispatcher.InvokeAsync(() => { }, System.Windows.Threading.DispatcherPriority.ContextIdle);
 
             var name = tab.Header?.ToString()?.ToLowerInvariant().Replace(' ', '-') ?? "tab";
@@ -95,8 +96,6 @@ public partial class MainWindow : Window
             for (var i = 1; i < cmbDiagram.Items.Count; i++)
             {
                 cmbDiagram.SelectedIndex = i;
-                await Dispatcher.InvokeAsync(() => { }, System.Windows.Threading.DispatcherPriority.ContextIdle);
-                FitDiagram();
                 await Dispatcher.InvokeAsync(() => { }, System.Windows.Threading.DispatcherPriority.ContextIdle);
                 CaptureTo(Path.Combine(directory, $"{stem}-diagram-{i}.png"));
             }
@@ -741,6 +740,27 @@ public partial class MainWindow : Window
     /// taller than it is wide, and fitting both axes turns it into a postage
     /// stamp; a flow chart normally fits whole and should be shown whole.
     /// </summary>
+    /// <summary>
+    /// True when a diagram loaded while the Diagrams tab was hidden. The
+    /// viewport measures zero then, so the fit must be redone the first time
+    /// the pane actually has a size. Without this, a diagram that arrived from
+    /// the background task sat at 1:1, which for a large ERD means the pane
+    /// shows a corner of whitespace and looks broken.
+    /// </summary>
+    private bool _diagramFitPending;
+
+    private void diagramScroller_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        // Deferred one layout pass: SizeChanged fires before the ScrollViewer
+        // has computed its viewport, so fitting immediately still measures zero
+        // and the diagram stays unfitted.
+        if (_diagramFitPending && e.NewSize.Width > 0)
+            Dispatcher.InvokeAsync(() =>
+            {
+                if (_diagramFitPending) FitDiagram();
+            }, System.Windows.Threading.DispatcherPriority.Loaded);
+    }
+
     private void FitDiagram()
     {
         if (imgDiagram.Source is not BitmapSource bitmap) return;
@@ -750,9 +770,11 @@ public partial class MainWindow : Window
         // its scale in the DPI metadata, so device pixels would misjudge it.
         if (width <= 0 || height <= 0 || bitmap.Width <= 0 || bitmap.Height <= 0)
         {
+            _diagramFitPending = true;
             SetZoom(1);
             return;
         }
+        _diagramFitPending = false;
 
         // Never enlarge past 1:1: a small diagram blown up just looks blurred.
         var byWidth = Math.Min(1.0, width / bitmap.Width);

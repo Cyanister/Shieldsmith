@@ -469,7 +469,8 @@
                                                    Text="Nothing to draw. This solution has no tables and no cloud flows, so there is no diagram to show. The Notes tab says the same."/>
                                         <ScrollViewer x:Name="diagramScroller"
                                                       HorizontalScrollBarVisibility="Auto"
-                                                      VerticalScrollBarVisibility="Auto" Padding="14">
+                                                      VerticalScrollBarVisibility="Auto" Padding="14"
+                                                      SizeChanged="diagramScroller_SizeChanged">
                                             <Image x:Name="imgDiagram" Stretch="None"
                                                    HorizontalAlignment="Center" VerticalAlignment="Top"
                                                    RenderOptions.BitmapScalingMode="HighQuality">
