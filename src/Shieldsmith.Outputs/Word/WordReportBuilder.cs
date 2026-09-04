@@ -705,7 +705,7 @@ public static class WordReportBuilder
 
     private static Table KeyValueTable(IReadOnlyList<(string Key, string Value)> pairs)
     {
-        var table = NewTable(2);
+        var table = NewTable(2, new[] { 30.0, 70 });
         foreach (var (key, value) in pairs)
         {
             table.Append(new TableRow(
@@ -715,9 +715,51 @@ public static class WordReportBuilder
         return table;
     }
 
+    /// <summary>Usable width between the A4 margins, in twentieths of a point.</summary>
+    private const int ContentWidthDxa = 9070;
+
+    /// <summary>
+    /// Relative column widths per table, keyed by the header row. Autofit gave
+    /// every column an equal share, which handed a two-digit Count column a
+    /// third of the page while the identifiers beside it wrapped twenty lines
+    /// deep. Fixed layout with proportions tuned to the content is what a
+    /// person laying these tables out by hand would choose. A table without an
+    /// entry falls back to equal columns, which is only ever mediocre, so add
+    /// an entry here when adding a table.
+    /// </summary>
+    private static readonly Dictionary<string, double[]> ColumnWeights = new(StringComparer.Ordinal)
+    {
+        ["Component type|Count|Identifiers"] = new[] { 24.0, 9, 67 },
+        ["Column|Logical name|Type|Requirement|Notes"] = new[] { 22.0, 25, 17, 17, 19 },
+        ["Key|Columns"] = new[] { 30.0, 70 },
+        ["Form|Type|Tabs and sections|Script libraries"] = new[] { 24.0, 12, 42, 22 },
+        ["View|Default|Columns"] = new[] { 30.0, 12, 58 },
+        ["Name|Kind|Primary table|State"] = new[] { 40.0, 20, 26, 14 },
+        ["Step|Operation"] = new[] { 58.0, 42 },
+        ["Data source|Table|Entity set"] = new[] { 36.0, 32, 32 },
+        ["Control|Type|Authored properties"] = new[] { 24.0, 20, 56 },
+        ["Topic|Trigger phrases|Messages"] = new[] { 24.0, 38, 38 },
+        ["Tool|Kind|Description"] = new[] { 26.0, 20, 54 },
+        ["Source|Kind|Location"] = new[] { 30.0, 22, 48 },
+        ["#|Stage|Steps"] = new[] { 7.0, 28, 65 },
+        ["Direction|Name|Type|Description"] = new[] { 14.0, 24, 16, 46 },
+        ["Step|Outputs"] = new[] { 68.0, 32 },
+        ["Name|Display name|Scope|Values"] = new[] { 24.0, 26, 14, 36 },
+        ["Role|Privileges|By level"] = new[] { 40.0, 18, 42 },
+        ["App|Unique name|Components"] = new[] { 40.0, 40, 20 },
+        ["Name|Display name|Type"] = new[] { 34.0, 40, 26 },
+        ["Logical name|Display name|Connector"] = new[] { 34.0, 32, 34 },
+        ["Relationship|One|Many|Lookup column|Cascade delete"] = new[] { 28.0, 18, 18, 20, 16 },
+        ["Relationship|Table 1|Table 2|Intersect table"] = new[] { 34.0, 22, 22, 22 },
+        ["Table|Column|Column type"] = new[] { 36.0, 32, 32 },
+        ["Name|Display name|Type|Required|Default value|Current value"] = new[] { 19.0, 19, 10, 11, 21, 20 },
+        ["Message|Table|Stage|Mode|Rank|Filtering columns"] = new[] { 15.0, 18, 14, 12, 7, 34 },
+    };
+
     private static Table DataTable(IReadOnlyList<string[]> rows)
     {
-        var table = NewTable(rows[0].Length);
+        ColumnWeights.TryGetValue(string.Join("|", rows[0]), out var weights);
+        var table = NewTable(rows[0].Length, weights);
         for (var i = 0; i < rows.Count; i++)
         {
             var row = new TableRow();
@@ -732,16 +774,27 @@ public static class WordReportBuilder
         return table;
     }
 
-    private static Table NewTable(int columnCount)
+    private static Table NewTable(int columnCount, double[]? weights = null)
     {
+        if (weights is null || weights.Length != columnCount)
+            weights = Enumerable.Repeat(1.0, columnCount).ToArray();
+        var total = weights.Sum();
+
         var grid = new TableGrid();
-        for (var i = 0; i < columnCount; i++)
-            grid.Append(new GridColumn());
+        foreach (var weight in weights)
+            grid.Append(new GridColumn
+            {
+                Width = ((int)Math.Round(ContentWidthDxa * weight / total)).ToString(),
+            });
+
+        // Fixed layout so the grid widths above are what the reader gets.
+        // Autofit renegotiates from content and produces the equal-thirds
+        // mess this table system exists to avoid.
         return new Table(
             new TableProperties(
                 new TableStyle { Val = WordStyles.TableStyle },
-                new TableWidth { Width = "5000", Type = TableWidthUnitValues.Pct },
-                new TableLayout { Type = TableLayoutValues.Autofit }),
+                new TableWidth { Width = ContentWidthDxa.ToString(), Type = TableWidthUnitValues.Dxa },
+                new TableLayout { Type = TableLayoutValues.Fixed }),
             grid);
     }
 
