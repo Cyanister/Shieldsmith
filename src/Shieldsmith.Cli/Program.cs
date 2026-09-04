@@ -35,7 +35,9 @@ if (command == "check")
     Console.WriteLine();
 
     var graphviz = Shieldsmith.Outputs.Diagrams.GraphvizRunner.FindDotExecutable();
-    Console.WriteLine($"  Graphviz          {(graphviz is null ? "not found (optional)" : graphviz)}");
+    Console.WriteLine($"  Graphviz          {(graphviz is null
+        ? "not found (optional; install: winget install Graphviz.Graphviz)"
+        : graphviz)}");
 
     Console.WriteLine("  Internal engine   available (always)");
 

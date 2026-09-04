@@ -35,6 +35,20 @@ you cannot install software at all, or want to run it from a USB stick.
 Windows will warn you about an unrecognised publisher until the release is code signed. That is
 being fixed; see [Still open](#still-open).
 
+### Optional: Graphviz
+
+Shieldsmith works fully without it. Installing it improves the layout of the Visio export and
+adds a Graphviz-rendered ERD alongside the built-in one:
+
+```
+winget install Graphviz.Graphviz
+```
+
+No PATH change is needed. Shieldsmith looks for `dot.exe` via the `GRAPHVIZ_DOT` environment
+variable, then PATH, then `Program Files\Graphviz*\bin`, which is where both the winget package
+and the graphviz.org installer put it. Restart Shieldsmith after installing and the header pill
+switches to "Graphviz found".
+
 ### Then
 
 1. Export a solution from Power Platform, managed or unmanaged.

@@ -66,7 +66,9 @@ public partial class AboutWindow : Window
                 ? $"Mermaid via WebView2 {webView}"
                 : "Mermaid unavailable (no WebView2 runtime)",
             "built-in layout engine (always available)",
-            GraphvizRunner.FindDotExecutable() is null ? "Graphviz not installed" : "Graphviz installed",
+            GraphvizRunner.FindDotExecutable() is null
+                ? "Graphviz not installed (optional; install with: winget install Graphviz.Graphviz)"
+                : "Graphviz installed",
             ClaudeCodeCliProvider.FindCli() is null ? "Claude Code CLI not found" : "Claude Code CLI found",
         };
         return string.Join("\n", parts);

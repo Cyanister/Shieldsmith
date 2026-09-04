@@ -146,7 +146,10 @@ public partial class MainWindow : Window
         var dot = GraphvizRunner.FindDotExecutable();
         SetPill(pillGraphviz, txtPillGraphviz, dot is not null,
             dot is not null ? "Graphviz found" : "Graphviz absent",
-            dot ?? "Optional. Only used for the Visio layout when it is present.");
+            dot ?? "Optional: improves the Visio layout and adds a Graphviz-rendered ERD. " +
+                   "Install with:  winget install Graphviz.Graphviz  " +
+                   "(no PATH change needed; Shieldsmith finds it in Program Files), " +
+                   "then restart Shieldsmith.");
 
         var claude = ClaudeCodeCliProvider.FindCli();
         SetPill(pillClaude, txtPillClaude, claude is not null,

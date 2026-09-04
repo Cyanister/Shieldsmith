@@ -59,7 +59,9 @@ public static class ErdGenerator
         else
         {
             result.Warning = "Graphviz is not installed; used the built-in layout. " +
-                             "Installing Graphviz (graphviz.org) improves diagram quality.";
+                             "To improve the Visio layout, install it with " +
+                             "'winget install Graphviz.Graphviz' (or from graphviz.org); " +
+                             "no PATH change is needed, Shieldsmith finds it in Program Files.";
         }
 
         result.Layout = FallbackLayoutEngine.Layout(model, showAttributes);
