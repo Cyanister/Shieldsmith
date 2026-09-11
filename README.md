@@ -19,21 +19,27 @@ Apache 2.0 licensed. Windows x64.
 
 ## Install
 
+Download from [the latest release](https://github.com/Cyanister/Shieldsmith/releases/latest).
 Two ways in, both self-contained. There is no .NET runtime to install first, which is the
 single most common complaint against the alternatives.
 
-**Installer.** Download `Shieldsmith-<version>-setup.exe` and run it. About 53 MB to download,
-178 MB installed. It installs for you alone, so there is **no administrator prompt** and it
-works on a locked-down work machine. You get a Start Menu entry, an optional desktop shortcut,
-and an optional PATH entry for the command line tool. Uninstall from Add or Remove Programs
-removes everything it added, including the PATH entry.
+**[Installer](https://github.com/Cyanister/Shieldsmith/releases/latest/download/Shieldsmith-Setup.exe).**
+About 53 MB to download, 178 MB installed. It installs for you alone, so there is **no
+administrator prompt** and it works on a locked-down work machine. You get a Start Menu entry,
+an optional desktop shortcut, and an optional PATH entry for the command line tool. Uninstall
+from Add or Remove Programs removes everything it added, including the PATH entry.
 
-**Portable zip.** Download `Shieldsmith-<version>-win-x64-portable.zip`, unzip it anywhere, and
-run `Shieldsmith.exe`. Nothing is written to the registry and nothing is installed. Use this if
-you cannot install software at all, or want to run it from a USB stick.
+**[Portable zip](https://github.com/Cyanister/Shieldsmith/releases/latest/download/Shieldsmith-win-x64-portable.zip).**
+Unzip it anywhere and run `Shieldsmith.exe`. Nothing is written to the registry and nothing is
+installed. Use this if you cannot install software at all, or want to run it from a USB stick.
 
-Windows will warn you about an unrecognised publisher until the release is code signed. That is
-being fixed; see [Still open](#still-open).
+Every release also publishes the same two files with the version in the name, for anyone
+archiving a specific build, and a `SHA256SUMS.txt` to verify a download against.
+
+Windows will show **"Windows protected your PC"** on first run, because the release is not yet
+code signed. Choose **More info**, then **Run anyway**. That means Windows has not seen the file
+often enough to recognise it, not that anything is wrong with it. Signing is
+[still open](#still-open); until then, the checksums and the source are how you verify it.
 
 ### Optional: Graphviz
 
